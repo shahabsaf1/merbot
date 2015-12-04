@@ -113,17 +113,17 @@ aside {
 /*        border-color: rgba(white, .3);*/
         border-color: rgba($theme-dark, .5);
         .navbar-header .navbar-brand {
-            color: rgba(black, .7);
+            color: $theme-primary;
             &:hover,
             &:focus {
-                color: black;
+                color: darken($theme-primary, 10%);
             }
         }
         .nav > li > a,
         .nav > li > a:focus {
-            color: rgba(white, .7);
+            color: $theme-dark;
             &:hover {
-                color: white;
+                color: $theme-primary;
             }
         }
         &.affix {
