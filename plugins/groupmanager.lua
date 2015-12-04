@@ -481,6 +481,8 @@ return {
   description = "Plugin to manage group chat.",
   usage = {
     "!about : Read group description",
+    "!gpadd : Add group to moderation list.",
+    "!gprem : Remove group from moderation list.",
     "!group <lock|unlock> bot : {Dis}allow APIs bots",
     "!group <lock|unlock> member : Lock/unlock group member",
     "!group <lock|unlock> name : Lock/unlock group name",
