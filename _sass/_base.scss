@@ -110,12 +110,13 @@ aside {
     }
     @media (min-width: 768px) {
         background-color: transparent;
-        border-color: rgba(white, .3);
+/*        border-color: rgba(white, .3);*/
+        border-color: rgba($theme-dark, .5);
         .navbar-header .navbar-brand {
-            color: rgba(white, .7);
+            color: rgba(black, .7);
             &:hover,
             &:focus {
-                color: white;
+                color: black;
             }
         }
         .nav > li > a,
@@ -163,6 +164,7 @@ header {
         text-align: center;
         padding: 100px 15px 100px;
         width: 100%;
+        text-shadow: 1px 1px 1px #000;
         .header-content-inner {
             h1 {
                 font-weight: 700;
