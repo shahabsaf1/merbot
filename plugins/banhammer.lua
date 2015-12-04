@@ -439,6 +439,9 @@ end
 return {
   description = "Plugin to manage bans, kicks and white/black lists.",
   usage = {
+    user = {
+      "!kickme : Kick yourself out of this group."
+    },
     admin = {
       "!superban : If type in reply, will ban user globally.",
       "!superban <user_id>/@<username> : Kick user_id/username from all chat and kicks it if joins again",
