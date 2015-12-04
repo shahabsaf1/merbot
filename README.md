@@ -7,13 +7,13 @@
 
 This is the testing branch to test addition of moderation system to merbot. 
 
-1. **Autoleave**
+1. **Autoleave**  
 So the bot will kick itself when invited to unmanaged groups.
 2. **Banhammer**  
 Manage bans, kicks and white/black lists.
 3. **Channels**  
 Manage channels. Enable or disable channel.
-4. **Greeter**
+4. **Greeter**  
 Sends a custom message when a user enters or leave a chat.
 5. **Group Manager**  
 Manage group chat.
@@ -23,7 +23,7 @@ Help plugin. Get info from other plugins.
 Know your id or the id of a chat members.
 8. **Invite**  
 Invite other user to the chat group.
-9. **Moderation**
+9. **Moderation**  
 Group moderation, i.e promote, demote and list administrators or moderators of a group.
 10. **Plugins**  
 Plugin to manage other plugins. Enable, disable or reload.
