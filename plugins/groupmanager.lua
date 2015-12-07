@@ -1,19 +1,19 @@
 -- data saved to data/moderation.json
 do
 
+local administrators_only = 'For administrator only!'
+local moderators_only = 'For moderators only!'
+local receiver = receiver
+
 local function create_group(msg)
-  if not is_admin(msg) then
-    return "You're not admin!"
-  end
+  if not is_admin(msg) then return administrators_only end
   local group_creator = msg.from.print_name
   create_group_chat (group_creator, group_name, ok_cb, false)
 	return 'Group '..string.gsub(group_name, '_', ' ')..' has been created.'
 end
 
 local function addgroup(msg)
-  if not is_admin(msg) then
-    return "You're not admin"
-  end
+  if not is_admin(msg) then return administrators_only end
   local data = load_data(_config.moderation.data)
   if data[tostring(msg.to.id)] then
     return 'Group is already added.'
@@ -28,7 +28,8 @@ local function addgroup(msg)
       lock_photo = 'no',
       lock_member = 'no',
       anti_flood = 'no',
-      welcome = 'no'
+      welcome = 'no',
+      sticker = 'ok'
       }
     }
   save_data(_config.moderation.data, data)
@@ -37,11 +38,9 @@ local function addgroup(msg)
 end
 
 local function remgroup(msg)
-  if not is_admin(msg) then
-    return "You're not admin"
-  end
+  if not is_admin(msg) then return administrators_only end
   local data = load_data(_config.moderation.data)
-  local receiver = get_receiver(msg)
+  --local receiver = get_receiver(msg)
   if not data[tostring(msg.to.id)] then
     return 'Group is not added.'
   end
@@ -56,9 +55,9 @@ local function export_chat_link_callback(extra, success, result)
   local msg = extra.msg
   local group_name = msg.to.title
   local data = extra.data
-  local receiver = get_receiver(msg)
+  --local receiver = get_receiver(msg)
   if success == 0 then
-    return send_large_msg(receiver, "Can't generate invite link for this group.\nMake sure you're the admin or sudoer.")
+    return send_large_msg(receiver, 'Cannot generate invite link for this group.\nMake sure you are an admin or a sudoer.')
   end
   data[tostring(msg.to.id)]['link'] = result
   save_data(_config.moderation.data, data)
@@ -66,9 +65,7 @@ local function export_chat_link_callback(extra, success, result)
 end
 
 local function set_description(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local data_cat = 'description'
 	data[tostring(msg.to.id)][data_cat] = deskripsi
 	save_data(_config.moderation.data, data)
@@ -86,9 +83,7 @@ local function get_description(msg, data)
 end
 
 local function set_rules(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local data_cat = 'rules'
 	data[tostring(msg.to.id)][data_cat] = rules
 	save_data(_config.moderation.data, data)
@@ -108,12 +103,10 @@ end
 
 -- dis/allow APIs bots to enter group. Spam prevention.
 local function allow_api_bots(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_bot_lock = data[tostring(msg.to.id)]['settings']['lock_bots']
 	if group_bot_lock == 'no' then
-    return 'Bots allowed to enter group.'
+    return 'Bots are allowed to enter group.'
 	else
     data[tostring(msg.to.id)]['settings']['lock_bots'] = 'no'
     save_data(_config.moderation.data, data)
@@ -122,12 +115,10 @@ local function allow_api_bots(msg, data)
 end
 
 local function disallow_api_bots(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_bot_lock = data[tostring(msg.to.id)]['settings']['lock_bots']
 	if group_bot_lock == 'yes' then
-    return 'Group already locked from bots.'
+    return 'Group is already locked from bots.'
 	else
     data[tostring(msg.to.id)]['settings']['lock_bots'] = 'yes'
     save_data(_config.moderation.data, data)
@@ -137,9 +128,7 @@ end
 
 -- lock/unlock group name. bot automatically change group name when locked
 local function lock_group_name(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_name_set = data[tostring(msg.to.id)]['settings']['set_name']
   local group_name_lock = data[tostring(msg.to.id)]['settings']['lock_name']
 	if group_name_lock == 'yes' then
@@ -154,9 +143,7 @@ local function lock_group_name(msg, data)
 end
 
 local function unlock_group_name(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_name_set = data[tostring(msg.to.id)]['settings']['set_name']
   local group_name_lock = data[tostring(msg.to.id)]['settings']['lock_name']
 	if group_name_lock == 'no' then
@@ -170,9 +157,7 @@ end
 
 --lock/unlock group member. bot automatically kick new added user when locked
 local function lock_group_member(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_member_lock = data[tostring(msg.to.id)]['settings']['lock_member']
 	if group_member_lock == 'yes' then
     return 'Group members are already locked'
@@ -184,9 +169,7 @@ local function lock_group_member(msg, data)
 end
 
 local function unlock_group_member(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_member_lock = data[tostring(msg.to.id)]['settings']['lock_member']
 	if group_member_lock == 'no' then
     return 'Group members are not locked'
@@ -199,9 +182,7 @@ end
 
 --lock/unlock group photo. bot automatically keep group photo when locked
 local function lock_group_photo(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_photo_lock = data[tostring(msg.to.id)]['settings']['lock_photo']
 	if group_photo_lock == 'yes' then
     return 'Group photo is already locked'
@@ -213,9 +194,7 @@ local function lock_group_photo(msg, data)
 end
 
 local function unlock_group_photo(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local group_photo_lock = data[tostring(msg.to.id)]['settings']['lock_photo']
 	if group_photo_lock == 'no' then
     return 'Group photo is not locked'
@@ -228,7 +207,7 @@ end
 
 local function set_group_photo(msg, success, result)
   local data = load_data(_config.moderation.data)
-  local receiver = get_receiver(msg)
+  --local receiver = get_receiver(msg)
   if success then
     local file = 'data/photos/chat_photo_'..msg.to.id..'.jpg'
     print('File downloaded to:', result)
@@ -248,9 +227,7 @@ end
 
 -- show group settings
 local function show_group_settings(msg, data)
-  if not is_mod(msg) then
-    return "For moderators only!"
-  end
+  if not is_mod(msg) then return moderators_only end
   local settings = data[tostring(msg.to.id)]['settings']
   if settings.lock_bots == 'yes' then
     lock_bots_state = '🔒'
@@ -282,6 +259,11 @@ local function show_group_settings(msg, data)
   elseif settings.welcome == 'no' then
     greeting_state = '🔓'
   end
+  if settings.sticker ~= 'ok' then
+    sticker_state = '🔒'
+  elseif settings.sticker == 'ok' then
+    sticker_state = '🔓'
+  end
   local text = 'Group settings:\n'
         ..'\n'..lock_bots_state..' Lock group from bot : '..settings.lock_bots
         ..'\n'..lock_name_state..' Lock group name : '..settings.lock_name
@@ -289,6 +271,7 @@ local function show_group_settings(msg, data)
         ..'\n'..lock_member_state..' Lock group member : '..settings.lock_member
         ..'\n'..antiflood_state..' Flood protection : '..settings.anti_flood
         ..'\n'..greeting_state..' Welcome message : '..settings.welcome
+        ..'\n'..sticker_state..' Sticker policy : '..settings.sticker
   return text
 end
 
@@ -307,7 +290,7 @@ function run(msg, matches)
 	end
 
   local data = load_data(_config.moderation.data)
-  local receiver = get_receiver(msg)
+  --local receiver = get_receiver(msg)
 
   -- create a group
   if matches[1] == 'mkgroup' and matches[2] then
@@ -357,62 +340,85 @@ function run(msg, matches)
 
     -- group link {get|set}
     if matches[1] == 'link' then
-      local chat = 'chat#id'..msg.to.id
       if matches[2] == 'get' then
         if data[tostring(msg.to.id)]['link'] then
           local about = get_description(msg, data)
           local link = data[tostring(msg.to.id)]['link']
           return about.."\n\n"..link
         else
-          return "Invite link is not exist.\nTry !link set to generate it."
+          return 'Invite link does not exist.\nTry !link set to generate it.'
         end
       end
       if matches[2] == 'set' and is_mod(msg) then
-        msgr = export_chat_link(chat, export_chat_link_callback, {data=data, msg=msg})
+        msgr = export_chat_link(receiver, export_chat_link_callback, {data=data, msg=msg})
       end
 	  end
 
-    -- lock {bot|name|member|photo}
-		if matches[1] == 'group' and matches[2] == 'lock' then
-      if matches[3] == 'bot' then
-        return disallow_api_bots(msg, data)
-      end
-      if matches[3] == 'name' then
-        return lock_group_name(msg, data)
-      end
-      if matches[3] == 'member' then
-        return lock_group_member(msg, data)
-      end
-      if matches[3] == 'photo' then
-        return lock_group_photo(msg, data)
-      end
-		end
+		if matches[1] == 'group' then
+      -- lock {bot|name|member|photo|sticker}
+      if matches[2] == 'lock' then
+        if matches[3] == 'bot' then
+          return disallow_api_bots(msg, data)
+        end
+        if matches[3] == 'name' then
+          return lock_group_name(msg, data)
+        end
+        if matches[3] == 'member' then
+          return lock_group_member(msg, data)
+        end
+        if matches[3] == 'photo' then
+          return lock_group_photo(msg, data)
+        end
+      -- unlock {bot|name|member|photo|sticker}
+		  elseif matches[2] == 'unlock' then
+        if matches[3] == 'bot' then
+          return allow_api_bots(msg, data)
+        end
+        if matches[3] == 'name' then
+          return unlock_group_name(msg, data)
+        end
+        if matches[3] == 'member' then
+          return unlock_group_member(msg, data)
+        end
+        if matches[3] == 'photo' then
+          return unlock_group_photo(msg, data)
+        end
+      -- view group settings
+      elseif matches[2] == 'settings' then
+        return show_group_settings(msg, data)
+		  end
+    end
 
-    -- unlock {bot|name|member|photo}
-		if matches[1] == 'group' and matches[2] == 'unlock' then
-      if matches[3] == 'bot' then
-        return allow_api_bots(msg, data)
+    if matches[1] == 'sticker' then
+      if matches[2] == 'warn' then
+        if welcome_stat ~= 'warn' then
+          data[tostring(msg.to.id)]['settings']['sticker'] = 'warn'
+          save_data(_config.moderation.data, data)
+        end
+        return 'Stickers already prohibited.\nSender will be warned first, then kicked for second violation.'
       end
-      if matches[3] == 'name' then
-        return unlock_group_name(msg, data)
+      if matches[2] == 'kick' then
+        if welcome_stat ~= 'kick' then
+          data[tostring(msg.to.id)]['settings']['sticker'] = 'kick'
+          save_data(_config.moderation.data, data)
+        end
+        return 'Stickers already prohibited.\nSender will be kicked!'
       end
-      if matches[3] == 'member' then
-        return unlock_group_member(msg, data)
+      if matches[2] == 'ok' then
+        if welcome_stat == 'ok' then
+          return 'Sticker restriction is not enabled.'
+        else
+          data[tostring(msg.to.id)]['settings']['sticker'] = 'ok'
+          save_data(_config.moderation.data, data)
+          return 'Sticker restriction has been disabled.'
+        end
       end
-      if matches[3] == 'photo' then
-        return unlock_group_photo(msg, data)
-      end
-		end
-
-    -- view group settings
-		if matches[1] == 'group' and matches[2] == 'settings' then
-      return show_group_settings(msg, data)
-		end
+    end
 
     -- if group name is renamed
     if matches[1] == 'chat_rename' then
       if not msg.service then
-        return "Are you trying to troll me?"
+        return 'Are you trying to troll me?'
       end
       local group_name_set = settings.set_name
       local group_name_lock = settings.lock_name
@@ -446,18 +452,40 @@ function run(msg, matches)
     -- if a user is added to group
 		if matches[1] == 'chat_add_user' then
       if not msg.service then
-        return "Are you trying to troll me?"
+        return 'Are you trying to troll me?'
       end
       local group_member_lock = settings.lock_member
       local group_bot_lock = settings.lock_bots
       local user = 'user#id'..msg.action.user.id
-      local chat = 'chat#id'..msg.to.id
       if group_member_lock == 'yes' then
-        chat_del_user(chat, user, ok_cb, true)
+        chat_del_user(receiver, user, ok_cb, true)
       -- no APIs bot are allowed to enter chat group.
       elseif group_bot_lock == 'yes' and msg.action.user.flags == 4352 then
-        chat_del_user(chat, user, ok_cb, true)
+        chat_del_user(receiver, user, ok_cb, true)
       elseif group_bot_lock == 'no' or group_member_lock == 'no' then
+        return nil
+      end
+    end
+
+    -- if sticker is sent
+    if msg.media and msg.media.caption == 'sticker.webp' and not is_mod(msg) then
+      local user_id = msg.from.id
+      local chat_id = msg.to.id
+      local sticker_hash = 'mer_sticker:'..chat_id..':'..user_id
+      local is_sticker_offender = redis:get(sticker_hash)
+      if settings.sticker == 'warn' then
+        if is_sticker_offender then
+          chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
+          redis:del(sticker_hash)
+          return 'You have been warned to not sending sticker into this group!'
+        elseif not is_sticker_offender then
+          redis:set(sticker_hash, true)
+          return 'DO NOT send sticker into this group!\nThis is a WARNING, next time you will be kicked!'
+        end
+      elseif settings.sticker == 'kick' then
+        chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
+        return 'DO NOT send sticker into this group!'
+      elseif settings.sticker == 'ok' then
         return nil
       end
     end
@@ -465,7 +493,7 @@ function run(msg, matches)
     -- if group photo is deleted
 		if matches[1] == 'chat_delete_photo' then
       if not msg.service then
-        return "Are you trying to troll me?"
+        return 'Are you trying to troll me?'
       end
       local group_photo_lock = settings.lock_photo
       if group_photo_lock == 'yes' then
@@ -478,7 +506,7 @@ function run(msg, matches)
     -- if group photo is changed
 		if matches[1] == 'chat_change_photo' and msg.from.id ~= 0 then
       if not msg.service then
-        return "Are you trying to troll me?"
+        return 'Are you trying to troll me?'
       end
       local group_photo_lock = settings.lock_photo
       if group_photo_lock == 'yes' then
@@ -492,29 +520,32 @@ function run(msg, matches)
 end
 
 return {
-  description = "Plugin to manage group chat.",
+  description = 'Plugin to manage group chat.',
   usage = {
     admin = {
-      "!mkgroup <group_name> : Make/create a new group.",
-      "!addgroup : Add group to moderation list.",
-      "!remgroup : Remove group from moderation list."
+      '!mkgroup <group_name> : Make/create a new group.',
+      '!addgroup : Add group to moderation list.',
+      '!remgroup : Remove group from moderation list.'
     },
     moderator = {
-      "!group <lock|unlock> bot : {Dis}allow APIs bots",
-      "!group <lock|unlock> member : Lock/unlock group member",
-      "!group <lock|unlock> name : Lock/unlock group name",
-      "!group <lock|unlock> photo : Lock/unlock group photo",
-      "!group settings : Show group settings",
-      "!link <set> : Generate/revoke invite link",
-      "!setabout <description> : Set group description",
-      "!setname <new_name> : Set group name",
-      "!setphoto : Set group photo",
-      "!setrules <rules> : Set group rules"
+      '!group <lock|unlock> bot : {Dis}allow APIs bots.',
+      '!group <lock|unlock> member : Lock/unlock group member.',
+      '!group <lock|unlock> name : Lock/unlock group name.',
+      '!group <lock|unlock> photo : Lock/unlock group photo.',
+      '!group settings : Show group settings.',
+      '!link <set> : Generate/revoke invite link.',
+      '!setabout <description> : Set group description.',
+      '!setname <new_name> : Set group name.',
+      '!setphoto : Set group photo.',
+      '!setrules <rules> : Set group rules.',
+      '!sticker warn : Sticker restriction, sender will be warned for the first violation.',
+      '!sticker kick : Sticker restriction, sender will be kick.',
+      '!sticker ok : Disable sticker restriction.'
     },
     user = {
-      "!about : Read group description",
-      "!rules : Read group rules",
-      "!link <get> : Print invite link"
+      '!about : Read group description',
+      '!rules : Read group rules',
+      '!link <get> : Print invite link'
     },
   },
   patterns = {
@@ -534,6 +565,7 @@ return {
     "^!(setname) (.*)$",
     "^!(setphoto)$",
     "^!(setrules) (.*)$",
+    "^!(sticker) (.*)$",
     "^!!tgservice (.+)$",
     "%[(video)%]"
   },

@@ -17,7 +17,8 @@ local function check_member(cb_extra, success, result)
           lock_photo = 'no',
           lock_member = 'no',
           anti_flood = 'no',
-          welcome = 'no'
+          welcome = 'no',
+          sticker = 'ok',
           }
        }
       save_data(_config.moderation.data, data)
@@ -50,7 +51,8 @@ local function automodadd(msg)
         lock_photo = 'no',
         lock_member = 'no',
         anti_flood = 'no',
-        welcome = 'no'
+        welcome = 'no',
+        sticker = 'ok',
         }
       }
     save_data(_config.moderation.data, data)
@@ -151,7 +153,6 @@ local function action_by_id(extra, success, result)
       vuserid = tostring(v.id)
       if matches[2] == vuserid then
         print(vuserid, member, v.id)
-        local full_name = (v.first_name or '')..' '..(v.last_name or '')
         local member_username = 'user#id'..member
         local member_id = vuserid
         if matches[1] == 'promote' then
@@ -173,7 +174,11 @@ local function action_by_reply(extra, success, result)
   local msg = result
   local receiver = get_receiver(msg)
   local full_name = (msg.from.first_name or '')..' '..(msg.from.last_name or '')
-  local member_username = (msg.from.username or full_name)
+  if msg.from.username then
+    member_username = '@'..msg.from.username
+  else
+    member_username = full_name
+  end
   local member_id = msg.from.id
   if msg.to.type == 'chat' and not is_sudo(msg) then
     if extra.msg.text == '!promote' then

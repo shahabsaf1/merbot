@@ -1,0 +1,10 @@
+--- tg/lua-tg.c	2015-12-06 14:34:31.624572793 +0700
++++ tg/lua-tg.c	2015-12-06 14:35:59.166330287 +0700
+@@ -263,6 +263,7 @@
+   case tgl_message_media_document_encr:
+     lua_newtable (luaState);
+     lua_add_string_field ("type", "document");
++    lua_add_string_field ("caption", M->document->caption);
+     break;
+   case tgl_message_media_unsupported:
+     lua_newtable (luaState);
