@@ -17,13 +17,13 @@ local function enable_channel(receiver)
 	end
 
 	if _config.disabled_channels[receiver] == nil then
-		return 'Channel isn\'t disabled'
+		return 'Channel is not disabled'
 	end
 
 	_config.disabled_channels[receiver] = false
 
 	save_config()
-	return "Channel re-enabled"
+	return 'Channel re-enabled'
 end
 
 local function disable_channel( receiver )
@@ -34,21 +34,21 @@ local function disable_channel( receiver )
 	_config.disabled_channels[receiver] = true
 
 	save_config()
-	return "Channel disabled"
+	return 'Channel disabled'
 end
 
 local function pre_process(msg)
 	local receiver = get_receiver(msg)
 
-	-- If sender is sudo then re-enable the channel
+	-- If sender is a moderator then re-enable the channel
 	if is_mod(msg) then
-	  if msg.text == "!channel enable" then
+	  if msg.text == '!channel enable' then
 	    enable_channel(receiver)
 	  end
 	end
 
   if is_channel_disabled(receiver) then
-  	msg.text = ""
+  	msg.text = ''
   end
 
 	return msg
@@ -67,17 +67,18 @@ local function run(msg, matches)
 end
 
 return {
-	description = "Plugin to manage channels. Enable or disable channel.",
+	description = 'Plugin to manage channels. Enable or disable channel.',
 	usage = {
-		"!channel enable: enable current channel",
-		"!channel disable: disable current channel"
+    moderator = {
+		  ' !channel enable: enable current channel',
+		  ' !channel disable: disable current channel'
+    },
   },
 	patterns = {
 		"^!channel? (enable)",
 		"^!channel? (disable)"
   },
 	run = run,
-	--privileged = true,
   moderated = true,
 	pre_process = pre_process
 }
