@@ -9,7 +9,7 @@
 do
 
 function run(msg, matches)
-  if is_admin(msg) then
+  if is_sudo(msg) then
 		return io.popen(matches[1]):read('*all')
   end
 end
@@ -17,7 +17,7 @@ end
 return {
   description = 'Run a system command.',
   usage = {
-    admin = {
+    sudo = {
       '!bin <command>\n'
       ..'\nWARNING:'
       ..'\nThis plugin interfaces with your operating system.'
