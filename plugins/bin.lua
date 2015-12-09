@@ -22,7 +22,7 @@ return {
       ..'\nWARNING:'
       ..'\nThis plugin interfaces with your operating system.'
       ..'\nEven without root privileges, a bad command can be harmful.\n'
-      ..'\nOnly for admins. Turned off after use.',
+      ..'\nOnly for sudoers. Turned off after use.',
     },
   },
   patterns = {
