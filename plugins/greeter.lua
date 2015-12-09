@@ -63,10 +63,20 @@ local function run(msg, matches)
       if msg.action.link_issuer then
         user_id = msg.from.id
         new_member = (msg.from.first_name or '')..' '..(msg.from.last_name or '')
+        if msg.from.username then
+          username = '@'..msg.from.username..' AKA '
+        else
+          username = ''
+        end
         user_flags = msg.flags
       else
 	      user_id = msg.action.user.id
         new_member = (msg.action.user.first_name or '')..' '..(msg.action.user.last_name or '')
+        if msg.action.user.username then
+          username = '@'..msg.action.user.username..' AKA '
+        else
+          username = ''
+        end
         user_flags = msg.action.user.flags
       end
       -- do not greet (super)banned users or API bots.
@@ -94,7 +104,8 @@ local function run(msg, matches)
           rules = data[tostring(msg.to.id)]['rules']
           rules = '\nRules :\n'..rules..'\n'
         end
-        local welcomes = 'Welcome '..new_member..'\nYou are in group '..msg.to.title..'\n'
+        local welcomes = 'Welcome '..username..new_member..' ['..user_id..'].\n'
+                         ..'You are in group '..msg.to.title..'.\n'
         if welcome_stat == 'group' then
           receiver = get_receiver(msg)
         elseif welcome_stat == 'private' then
