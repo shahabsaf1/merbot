@@ -33,6 +33,14 @@ local function set_group_photo(msg, success, result)
   end
 end
 
+local function get_description(msg, data)
+  local about = data[tostring(msg.to.id)]['description']
+  if not about then
+    return 'No description available.'
+	end
+  return string.gsub(msg.to.print_name, "_", " ")..':\n\n'..about
+end
+
 -- media handler. needed by group_photo_lock
 local function pre_process(msg)
   if not msg.text and msg.media then
@@ -102,11 +110,7 @@ function run(msg, matches)
 	    save_data(_config.moderation.data, data)
 	    return 'Set group description to:\n'..matches[2]
     elseif matches[1] == 'about' then
-      if not data[tostring(msg.to.id)]['description'] then
-        return 'No description available.'
-	    end
-      local about = data[tostring(msg.to.id)]['description']
-      return string.gsub(msg.to.print_name, "_", " ")..':\n\n'..about
+      return get_description(msg, data)
     elseif matches[1] == 'setrules' and is_mod(msg) then
 	    data[tostring(msg.to.id)]['rules'] = matches[2]
 	    save_data(_config.moderation.data, data)
