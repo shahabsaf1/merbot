@@ -3,7 +3,7 @@
 <p align="center">**A Telegram Group Peace Keeper Bot**
 
 
-**Merbot** is Telegram group guardian bot based on [telegram-bot](https://github.com/yagop/telegram-bot) by [Yago Pérez](https://telegram.me/yago_perez) and [uzzbot](https://github.com/uziins/uzzbot) by [@silenceangel](https://telegram.me/silenceangel).
+**Merbot** is a dedicated Telegram group manager bot based on [telegram-bot](https://github.com/yagop/telegram-bot) by [Yago Pérez](https://telegram.me/yago_perez) and [uzzbot](https://github.com/uziins/uzzbot) by [@silenceangel](https://telegram.me/silenceangel).
 
 1. **Autoleave**  
 So the bot will kick itself when invited to unmanaged groups.
@@ -27,11 +27,11 @@ Invite other user to the chat group.
 Invite Me into a group chat.
 11. **Moderation**  
 Group moderation, i.e promote, demote and list administrators or moderators of a group.
-11. **Plugins**  
+12. **Plugins**  
 Plugin to manage other plugins. Enable, disable or reload.
-12. **Stats**  
+13. **Stats**  
 Update users stats.
-13. **Version**  
+14. **Version**  
 Shows bot version.
 
 Consult [wiki](https://github.com/rizaumami/merbot/wiki/Plugins) to know how to use those plugins.
