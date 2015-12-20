@@ -5,29 +5,33 @@
 
 **Merbot** is Telegram group guardian bot based on [telegram-bot](https://github.com/yagop/telegram-bot) by [Yago Pérez](https://telegram.me/yago_perez) and [uzzbot](https://github.com/uziins/uzzbot) by [@silenceangel](https://telegram.me/silenceangel).
 
-This is the testing branch to test addition of moderation system to merbot. 
-
 1. **Autoleave**  
 So the bot will kick itself when invited to unmanaged groups.
 2. **Banhammer**  
 Manage bans, kicks and white/black lists.
-3. **Channels**  
+3. **Bin**  
+Run system commands.
+4. **Channels**  
 Manage channels. Enable or disable channel.
-4. **Greeter**  
+5. **Greeter**  
 Sends a custom message when a user enters or leave a chat.
-5. **Group Manager**  
+6. **Group Manager**  
 Manage group chat.
-6. **Help**  
+7. **Help**  
 Help plugin. Get info from other plugins.
-7. **Id**  
-Know your id or the id of a chat members.
-8. **Invite**  
+8. **Id**  
+Know your ID or the ID of a chat members.
+9. **Invite**  
 Invite other user to the chat group.
-9. **Moderation**  
+10. **Inviteme**  
+Invite Me into a group chat.
+11. **Moderation**  
 Group moderation, i.e promote, demote and list administrators or moderators of a group.
-10. **Plugins**  
+11. **Plugins**  
 Plugin to manage other plugins. Enable, disable or reload.
-11. **Version**  
+12. **Stats**  
+Update users stats.
+13. **Version**  
 Shows bot version.
 
 Consult [wiki](https://github.com/rizaumami/merbot/wiki/Plugins) to know how to use those plugins.
