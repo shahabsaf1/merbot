@@ -4,8 +4,6 @@ Kicking ourself (bot) from unmanaged groups.
 When someone invited this bot to a group, the bot then will chek if the group is in its moderations (moderation.json). If not, the bot will exit immediately by kicking itself out of that group.
 
 No switch available. You need to turn it on or off using !plugins command.
-
-Testing needed.
 --]]
 
 -- suppress '*** lua: attempt to call a nil value' warning

@@ -16,7 +16,7 @@ function on_msg_receive (msg)
 
   local receiver = get_receiver(msg)
 
-  -- vardump(msg)
+  --vardump(msg)
   msg = pre_process_service_msg(msg)
   if msg_valid(msg) then
     msg = pre_process_msg(msg)
@@ -212,6 +212,7 @@ function create_config( )
       "help",
       "id",
       "invite",
+      "moderation",
       "plugins",
       "version"},
     sudo_users = {our_id},
