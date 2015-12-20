@@ -259,6 +259,8 @@ do
 
   local function run(msg, matches)
 
+    vardump(msg)
+
     local receiver = get_receiver(msg)
     local user = 'user#id'..(matches[2] or '')
 
@@ -289,6 +291,12 @@ do
           elseif string.match(matches[2], '^@.+$') then
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
+        elseif matches[1] == 'banlist' then
+          local text = 'Ban list for '..msg.to.title..' ['..msg.to.id..']:\n\n'
+          for k,v in pairs(redis:keys('banned:'..msg.to.id..':*')) do
+            text = text..k..'. '..v..'\n'
+          end
+          return string.gsub(text, 'banned:'..msg.to.id..':', '')
         elseif matches[1] == 'unban' then
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
@@ -389,6 +397,7 @@ do
         "!antiflood disable : Disable flood protection",
         "!ban : If type in reply, will ban user from chat group.",
         "!ban <user_id>/<@username>: Kick user from chat and kicks it if joins chat again",
+        "!banlist : List users banned from chat group.",
         "!unban : If type in reply, will unban user from chat group.",
         "!unban <user_id>/<@username>: Unban user",
         "!kick : If type in reply, will kick user from chat group.",
@@ -404,6 +413,7 @@ do
       "^!(antiflood) (.*)$",
       "^!(ban) (.*)$",
       "^!(ban)$",
+      "^!(banlist)$",
       "^!(unban) (.*)$",
       "^!(unban)$",
       "^!(kick) (.+)$",
