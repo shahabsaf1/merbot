@@ -6,12 +6,12 @@ do
   local NUM_MSG_MAX = 4  -- Max number of messages per TIME_CHECK seconds
   local TIME_CHECK = 4
 
-  local function is_user_whitelisted(id)
-    return redis:get('whitelist:user#id'..id) or false
+  local function is_user_whitelisted(user_id)
+    return redis:get('whitelist:user#id'..user_id) or false
   end
 
-  local function is_chat_whitelisted(id)
-    return redis:get('whitelist:chat#id'..id) or false
+  local function is_chat_whitelisted(chat_id)
+    return redis:get('whitelist:chat#id'..chat_id) or false
   end
 
   local function kick_user(user_id, chat_id)
@@ -177,7 +177,6 @@ do
 
     local user_id = msg.from.id
     local chat_id = msg.to.id
-    local user = 'user#id'..user_id
 
     -- ANTI SPAM
     if msg.from.type == 'user' and msg.text and not is_mod(msg) then
@@ -247,10 +246,12 @@ do
     if redis:get('whitelist:enabled') and not is_sudo(msg) then
       print('Whitelist enabled and not sudo')
       -- Check if user or chat is whitelisted
-      if not is_user_whitelisted(user_id) then
-        print('User '..user..' not whitelisted')
+      local allowed = is_user_whitelisted(user_id)
+      if not allowed then
+        print('User '..user_id..' not whitelisted')
         if is_chat_msg(msg) then
-          if not is_chat_whitelisted(chat_id) then
+          allowed = is_chat_whitelisted(chat_id)
+          if not allowed then
             print ('Chat '..chat_id..' not whitelisted')
           else
             print ('Chat '..chat_id..' whitelisted :)')
@@ -260,7 +261,7 @@ do
         print('User '..user_id..' allowed :)')
       end
 
-      if not is_user_whitelisted(user_id) then
+      if not allowed then
         msg.text = ''
       end
 
