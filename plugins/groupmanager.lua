@@ -4,32 +4,30 @@ do
   local function export_chat_link_cb(extra, success, result)
     local msg = extra.msg
     local data = extra.data
-    local receiver = get_receiver(msg)
     if success == 0 then
-      return send_large_msg(receiver, 'Cannot generate invite link for this group.\nMake sure you are an admin or a sudoer.')
+      return send_large_msg(get_receiver(msg), 'Cannot generate invite link for this group.\nMake sure you are an admin or a sudoer.')
     end
     data[tostring(msg.to.id)]['link'] = result
     save_data(_config.moderation.data, data)
-    return send_large_msg(receiver,'Newest generated invite link for '..msg.to.title..' is:\n'..result)
+    return send_large_msg(get_receiver(msg),'Newest generated invite link for '..msg.to.title..' is:\n'..result)
   end
 
   local function set_group_photo(msg, success, result)
     local data = load_data(_config.moderation.data)
-    local receiver = get_receiver(msg)
     if success then
       local file = 'data/photos/chat_photo_'..msg.to.id..'.jpg'
       print('File downloaded to:', result)
       os.rename(result, file)
       print('File moved to:', file)
-      chat_set_photo (receiver, file, ok_cb, false)
+      chat_set_photo (get_receiver(msg), file, ok_cb, false)
       data[tostring(msg.to.id)]['settings']['set_photo'] = file
       save_data(_config.moderation.data, data)
       data[tostring(msg.to.id)]['settings']['lock_photo'] = 'yes'
       save_data(_config.moderation.data, data)
-      send_large_msg(receiver, 'Photo saved!', ok_cb, false)
+      send_large_msg(get_receiver(msg), 'Photo saved!', ok_cb, false)
     else
       print('Error downloading: '..msg.id)
-      send_large_msg(receiver, 'Failed, please try again!', ok_cb, false)
+      send_large_msg(get_receiver(msg), 'Failed, please try again!', ok_cb, false)
     end
   end
 
@@ -38,7 +36,7 @@ do
     if not about then
       return 'No description available.'
 	  end
-    return string.gsub(msg.to.print_name, "_", " ")..':\n\n'..about
+    return string.gsub(msg.to.print_name, '_', ' ')..':\n\n'..about
   end
 
   -- media handler. needed by group_photo_lock
@@ -53,7 +51,6 @@ do
 
     if is_chat_msg(msg) then
       local data = load_data(_config.moderation.data)
-      local receiver = get_receiver(msg)
 
       -- create a group
       if matches[1] == 'mkgroup' and matches[2] and is_admin(msg) then
@@ -70,12 +67,12 @@ do
           settings = {
             set_name = string.gsub(msg.to.print_name, '_', ' '),
             lock_bots = 'no',
-            lock_name = 'no',
+            lock_name = 'yes',
             lock_photo = 'no',
             lock_member = 'no',
-            anti_flood = 'no',
-            welcome = 'no',
-            sticker = 'ok'
+            anti_flood = 'ban',
+            welcome = 'group',
+            sticker = 'ok',
             }
           }
         save_data(_config.moderation.data, data)
@@ -125,12 +122,12 @@ do
             if data[tostring(msg.to.id)]['link'] then
               local about = get_description(msg, data)
               local link = data[tostring(msg.to.id)]['link']
-              return about.."\n\n"..link
+              return about..'\n\n'..link
             else
               return 'Invite link does not exist.\nTry !link set to generate.'
             end
           elseif matches[2] == 'set' and is_mod(msg) then
-            msgr = export_chat_link(receiver, export_chat_link_cb, {data=data, msg=msg})
+            msgr = export_chat_link(get_receiver(msg), export_chat_link_cb, {data=data, msg=msg})
           end
 	      elseif matches[1] == 'group' then
           -- lock {bot|name|member|photo|sticker}
@@ -282,7 +279,7 @@ do
           end
           if settings.lock_name == 'yes' then
             if settings.set_name ~= tostring(msg.to.print_name) then
-              rename_chat(receiver, settings.set_name, ok_cb, false)
+              rename_chat(get_receiver(msg), settings.set_name, ok_cb, false)
             end
           elseif settings.lock_name == 'no' then
             return nil
@@ -291,7 +288,7 @@ do
 		    elseif matches[1] == 'setname' and is_mod(msg) then
           settings.set_name = string.gsub(matches[2], '_', ' ')
           save_data(_config.moderation.data, data)
-          rename_chat(receiver, settings.set_name, ok_cb, false)
+          rename_chat(get_receiver(msg), settings.set_name, ok_cb, false)
 		    -- set group photo
 		    elseif matches[1] == 'setphoto' and is_mod(msg) then
           settings.set_photo = 'waiting'
@@ -304,10 +301,10 @@ do
           end
           local user = 'user#id'..msg.action.user.id
           if settings.lock_member == 'yes' then
-            chat_del_user(receiver, user, ok_cb, true)
+            chat_del_user(get_receiver(msg), user, ok_cb, true)
           -- no APIs bot are allowed to enter chat group.
           elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 then
-            chat_del_user(receiver, user, ok_cb, true)
+            chat_del_user(get_receiver(msg), user, ok_cb, true)
           elseif settings.lock_bots == 'no' or settings.lock_member == 'no' then
             return nil
           end
@@ -319,7 +316,7 @@ do
           local is_sticker_offender = redis:get(sticker_hash)
           if settings.sticker == 'warn' then
             if is_sticker_offender then
-              chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
+              chat_del_user(get_receiver(msg), 'user#id'..user_id, ok_cb, true)
               redis:del(sticker_hash)
               return 'You have been warned to not sending sticker into this group!'
             elseif not is_sticker_offender then
@@ -327,7 +324,7 @@ do
               return 'DO NOT send sticker into this group!\nThis is a WARNING, next time you will be kicked!'
             end
           elseif settings.sticker == 'kick' then
-            chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
+            chat_del_user(get_receiver(msg), 'user#id'..user_id, ok_cb, true)
             return 'DO NOT send sticker into this group!'
           elseif settings.sticker == 'ok' then
             return nil
@@ -338,7 +335,7 @@ do
             return 'Are you trying to troll me?'
           end
           if settings.lock_photo == 'yes' then
-            chat_set_photo (receiver, settings.set_photo, ok_cb, false)
+            chat_set_photo (get_receiver(msg), settings.set_photo, ok_cb, false)
           elseif settings.lock_photo == 'no' then
             return nil
           end
@@ -348,7 +345,7 @@ do
             return 'Are you trying to troll me?'
           end
           if settings.lock_photo == 'yes' then
-            chat_set_photo (receiver, settings.set_photo, ok_cb, false)
+            chat_set_photo (get_receiver(msg), settings.set_photo, ok_cb, false)
           elseif settings.lock_photo == 'no' then
             return nil
           end
