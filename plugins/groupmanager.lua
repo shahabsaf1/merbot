@@ -228,9 +228,9 @@ do
               lock_member_state = '🔓'
             end
             if settings.anti_flood ~= 'no' then
-              antiflood_state = '🔒'
+              antispam_state = '🔒'
             elseif settings.anti_flood == 'no' then
-              antiflood_state = '🔓'
+              antispam_state = '🔓'
             end
             if settings.welcome ~= 'no' then
               greeting_state = '🔒'
@@ -247,9 +247,9 @@ do
                   ..'\n'..lock_name_state..' Lock group name : '..settings.lock_name
                   ..'\n'..lock_photo_state..' Lock group photo : '..settings.lock_photo
                   ..'\n'..lock_member_state..' Lock group member : '..settings.lock_member
-                  ..'\n'..antiflood_state..' Flood protection : '..settings.anti_flood
-                  ..'\n'..greeting_state..' Welcome message : '..settings.welcome
+                  ..'\n'..antispam_state..' Spam and Flood protection : '..settings.anti_flood
                   ..'\n'..sticker_state..' Sticker policy : '..settings.sticker
+                  ..'\n'..greeting_state..' Welcome message : '..settings.welcome
             return text
 		      end
         elseif matches[1] == 'sticker' then
