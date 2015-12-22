@@ -35,7 +35,7 @@ do
   end
 
   local function is_super_banned(user_id)
-      return redis:get('superbanned:'..user_id) or false
+    return redis:get('superbanned:'..user_id) or false
   end
 
   local function unban_user(user_id, chat_id)
@@ -63,10 +63,10 @@ do
           local full_name = (v.first_name or '')..' '..(v.last_name or '')
           if matches[1] == 'ban' then
             ban_user(matches[2], chat_id)
-            send_large_msg(receiver, full_name..' ['..matches[2]..'] banned', ok_cb,  true)
+            send_msg(receiver, full_name..' ['..matches[2]..'] banned', ok_cb,  true)
           elseif matches[1] == 'superban' then
             superban_user(matches[2], chat_id)
-            send_large_msg(receiver, full_name..' ['..matches[2]..'] globally banned!', ok_cb, true)
+            send_msg(receiver, full_name..' ['..matches[2]..'] globally banned!', ok_cb, true)
           elseif matches[1] == 'kick' then
             kick_user(matches[2], chat_id)
           end
@@ -75,46 +75,43 @@ do
       if matches[1] == 'unban' then
         if is_banned(matches[2], chat_id) then
           unban_user(matches[2], chat_id)
-          send_large_msg(receiver, 'User with ID ['..matches[2]..'] is unbanned.')
+          send_msg(receiver, 'User with ID ['..matches[2]..'] is unbanned.')
         else
-          send_large_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
+          send_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
         end
       elseif matches[1] == 'superunban' then
         if is_super_banned(matches[2]) then
           superunban_user(matches[2], chat_id)
-          send_large_msg(receiver, 'User with ID ['..matches[2]..'] is globally unbanned.')
+          send_msg(receiver, 'User with ID ['..matches[2]..'] is globally unbanned.')
         else
-          send_large_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
+          send_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
         end
       end
       if not group_member then
-        send_large_msg(receiver, 'No user with ID '..matches[2]..' in this group.')
+        send_msg(receiver, 'No user with ID '..matches[2]..' in this group.')
       end
     end
   end
 
   local function action_by_reply(extra, success, result)
-    local msg = result
-    local receiver = get_receiver(msg)
-    local chat_id = msg.to.id
-    local user_id = msg.from.id
-    local user = 'user#id'..msg.from.id
-    local full_name = (msg.from.first_name or '')..' '..(msg.from.last_name or '')
-    if is_chat_msg(msg) and not is_sudo(msg) then
+    local chat_id = result.to.id
+    local user_id = result.from.id
+    local full_name = (result.from.first_name or '')..' '..(result.from.last_name or '')
+    if is_chat_msg(result) and not is_sudo(result) then
       if extra.match == 'kick' then
-        chat_del_user(receiver, user, ok_cb, false)
+        chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, false)
       elseif extra.match == 'ban' then
         ban_user(user_id, chat_id)
-        send_msg(receiver, 'User '..user_id..' banned', ok_cb,  true)
+        send_msg('chat#id'..chat_id, 'User '..user_id..' banned', ok_cb,  true)
       elseif extra.match == 'superban' then
         superban_user(user_id, chat_id)
-        send_large_msg(receiver, full_name..' ['..user_id..'] globally banned!')
+        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally banned!')
       elseif extra.match == 'unban' then
         unban_user(user_id, chat_id)
-        send_msg(receiver, 'User '..user_id..' unbanned', ok_cb,  true)
+        send_msg('chat#id'..chat_id, 'User '..user_id..' unbanned', ok_cb,  true)
       elseif extra.match == 'superunban' then
         superunban_user(user_id, chat_id)
-        send_large_msg(receiver, full_name..' ['..user_id..'] globally unbanned!')
+        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally unbanned!')
       end
     else
       return 'Use This in Your Groups'
@@ -122,14 +119,11 @@ do
   end
 
   local function resolve_username(extra, success, result)
-    local msg = extra.msg
-    local receiver = get_receiver(msg)
-    local chat_id = msg.to.id
+    local chat_id = extra.msg.to.id
     if result ~= false then
       local user_id = result.id
-      local user = 'user#id'..result.id
       local username = result.username
-      if is_chat_msg(msg) then
+      if is_chat_msg(extra.msg) then
         -- check if sudo users
         local is_sudoers = false
         for v,sudoer in pairs(_config.sudo_users) do
@@ -139,56 +133,76 @@ do
         end
         if not is_sudoers then
           if extra.match == 'kick' then
-            chat_del_user(receiver, user, ok_cb, false)
+            chat_del_user('chat#id'..chat_id, 'user#id'..result.id, ok_cb, false)
           elseif extra.match == 'ban' then
             ban_user(user_id, chat_id)
-            send_msg(receiver, 'User @'..username..' banned', ok_cb,  true)
+            send_msg('chat#id'..chat_id, 'User @'..username..' banned', ok_cb,  true)
           elseif extra.match == 'superban' then
             superban_user(user_id, chat_id)
-            send_msg(receiver, 'User @'..username..' ['..user_id..'] globally banned!', ok_cb,  true)
+            send_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally banned!', ok_cb,  true)
           elseif extra.match == 'unban' then
             unban_user(user_id, chat_id)
-            send_msg(receiver, 'User @'..username..' unbanned', ok_cb,  true)
+            send_msg('chat#id'..chat_id, 'User @'..username..' unbanned', ok_cb,  true)
           elseif extra.match == 'superunban' then
             superunban_user(user_id, chat_id)
-            send_msg(receiver, 'User @'..username..' ['..user_id..'] globally unbanned!', ok_cb,  true)
+            send_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally unbanned!', ok_cb,  true)
           end
         end
       else
         return 'Use This in Your Groups.'
       end
     else
-      send_large_msg(receiver, 'No user @'..extra.user..' in this group.')
+      send_msg('chat#id'..chat_id, 'No user @'..extra.user..' in this group.')
     end
+  end
+
+  local function trigger_anti_splooder(user_id, chat_id, splooder)
+    local data = load_data(_config.moderation.data)
+    local anti_spam_stat = data[tostring(chat_id)]['settings']['anti_flood']
+    if not redis:get('kicked:'..chat_id..':'..user_id) or false then
+      if anti_spam_stat == 'kick' then
+        kick_user(user_id, chat_id)
+        send_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder, ok_cb, true)
+      elseif anti_spam_stat == 'ban' then
+        ban_user(user_id, chat_id)
+        send_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder..'. Banned', ok_cb, true)
+      end
+      -- hackish way to avoid mulptiple kicking
+      redis:setex('kicked:'..chat_id..':'..user_id, 2, 'true')
+    end
+    msg = nil
   end
 
   local function pre_process(msg)
 
     local user_id = msg.from.id
     local chat_id = msg.to.id
-    local receiver = get_receiver(msg)
     local user = 'user#id'..user_id
+
+    -- ANTI SPAM
+    if msg.from.type == 'user' and msg.text and not is_mod(msg) then
+      local _nl, ctrl_chars = string.gsub(msg.text, '%c', '')
+      -- if string length more than 2048 or control characters is more than 50
+      if string.len(msg.text) > 2048 or ctrl_chars > 50 then
+        local _c, chars = string.gsub(msg.text, '%a', '')
+        local _nc, non_chars = string.gsub(msg.text, '%A', '')
+        -- if non characters is bigger than characters
+        if non_chars > chars then
+          local splooder = 'spamming'
+          trigger_anti_splooder(user_id, chat_id, splooder)
+        end
+      end
+    end
 
     -- ANTI FLOOD
     local post_count = 'floodc:'..user_id..':'..chat_id
     redis:incr(post_count)
-    if msg.from.type == 'user' then
+    if msg.from.type == 'user' and not is_mod(msg) then
       local post_count = 'user:'..user_id..':floodc'
       local msgs = tonumber(redis:get(post_count) or 0)
-      local text = 'User '..user_id..' is flooding'
-      if msgs > NUM_MSG_MAX and not is_sudo(msg) then
-        local data = load_data(_config.moderation.data)
-        local anti_flood_stat = data[tostring(chat_id)]['settings']['anti_flood']
-        if anti_flood_stat == 'kick' then
-          send_large_msg(receiver, text)
-          kick_user(user_id, chat_id)
-          msg = nil
-        elseif anti_flood_stat == 'ban' then
-          send_large_msg(receiver, text)
-          ban_user(user_id, chat_id)
-          send_msg(receiver, 'User '..user_id..' banned', ok_cb,  true)
-          msg = nil
-        end
+      if msgs > NUM_MSG_MAX then
+        local splooder = 'flooding'
+        trigger_anti_splooder(user_id, chat_id, splooder)
       end
       redis:setex(post_count, TIME_CHECK, msgs+1)
     end
@@ -306,7 +320,7 @@ do
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
         end
-        if matches[1] == 'antiflood' then
+        if matches[1] == 'antispam' then
           local data = load_data(_config.moderation.data)
           local settings = data[tostring(msg.to.id)]['settings']
           if matches[2] == 'kick' then
@@ -314,22 +328,22 @@ do
               settings.anti_flood = 'kick'
               save_data(_config.moderation.data, data)
             end
-              return 'Anti flood protection already enabled.\nFlooder will be kicked.'
+              return 'Anti flood and spam protection already enabled.\nOffender will be kicked.'
             end
           if matches[2] == 'ban' then
             if settings.anti_flood ~= 'ban' then
               settings.anti_flood = 'ban'
               save_data(_config.moderation.data, data)
             end
-              return 'Anti flood  protection already enabled.\nFlooder will be banned.'
+              return 'Anti flood and spam protection already enabled.\nOffender will be banned.'
             end
           if matches[2] == 'disable' then
             if settings.anti_flood == 'no' then
-              return 'Anti flood  protection is not enabled.'
+              return 'Anti flood and spam protection is not enabled.'
             else
               settings.anti_flood = 'no'
               save_data(_config.moderation.data, data)
-              return 'Anti flood  protection has been disabled.'
+              return 'Anti flood and spam protection has been disabled.'
             end
           end
         end
@@ -392,9 +406,9 @@ do
         '!superunban <user_id>/@<username> : Unban user_id/username globally.'
       },
       moderator = {
-        '!antiflood kick : Enable flood protection. Flooder will be kicked.',
-        '!antiflood ban : Enable flood protection. Flooder will be banned.',
-        '!antiflood disable : Disable flood protection',
+        '!antispam kick : Enable flood and spam protection. Offender will be kicked.',
+        '!antispam ban : Enable flood and spam protection. Offender will be banned.',
+        '!antispam disable : Disable flood and spam protection',
         '!ban : If type in reply, will ban user from chat group.',
         '!ban <user_id>/<@username>: Kick user from chat and kicks it if joins chat again',
         '!banlist : List users banned from chat group.',
@@ -410,7 +424,7 @@ do
       },
     },
     patterns = {
-      '^!(antiflood) (.*)$',
+      '^!(antispam) (.*)$',
       '^!(ban) (.*)$',
       '^!(ban)$',
       '^!(banlist)$',
