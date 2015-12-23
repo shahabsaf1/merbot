@@ -6,14 +6,6 @@ do
   local NUM_MSG_MAX = 4  -- Max number of messages per TIME_CHECK seconds
   local TIME_CHECK = 4
 
-  local function is_user_whitelisted(user_id)
-    return redis:get('whitelist:user#id'..user_id) or false
-  end
-
-  local function is_chat_whitelisted(chat_id)
-    return redis:get('whitelist:chat#id'..chat_id) or false
-  end
-
   local function kick_user(user_id, chat_id)
     if user_id == tostring(our_id) then
       send_msg('chat#id'..chat_id, 'I won\'t kick myself!', ok_cb,  true)
@@ -102,16 +94,22 @@ do
         chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, false)
       elseif extra.match == 'ban' then
         ban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, 'User '..user_id..' banned', ok_cb,  true)
+        send_msg('chat#id'..chat_id, 'User '..user_id..' banned', ok_cb, true)
       elseif extra.match == 'superban' then
         superban_user(user_id, chat_id)
         send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally banned!')
       elseif extra.match == 'unban' then
         unban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, 'User '..user_id..' unbanned', ok_cb,  true)
+        send_msg('chat#id'..chat_id, 'User '..user_id..' unbanned', ok_cb, true)
       elseif extra.match == 'superunban' then
         superunban_user(user_id, chat_id)
         send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally unbanned!')
+      elseif extra.match == 'whitelist' then
+        redis:set('whitelist:user#id'..user_id, true)
+        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] whitelisted', ok_cb, true)
+      elseif extra.match == 'unwhitelist' then
+        redis:del('whitelist:user#id'..user_id)
+        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] removed from whitelist', ok_cb, true)
       end
     else
       return 'Use This in Your Groups'
@@ -210,16 +208,15 @@ do
     if msg.action and msg.action.type then
       local action = msg.action.type
       -- Check if banned user joins chat
-      if action == 'chat_add_user' or action == 'chat_add_user_link' then
-        local user_id
+      if action == 'chat_add_user' or action == 'chat_add_user_link' then        
         if msg.action.link_issuer then
           user_id = msg.from.id
         else
 	        user_id = msg.action.user.id
         end
-        print('Checking invited user '..user_id)
+        print('>>> banhammer : Checking invited user '..user_id)
         if is_super_banned(user_id) or is_banned(user_id, chat_id) then
-          print('User is banned!')
+          print('>>> banhammer : '..user_id..' is (super)banned from '..chat_id)
           kick_user(user_id, chat_id)
         end
       end
@@ -230,12 +227,11 @@ do
     -- BANNED USER TALKING
     if is_chat_msg(msg) then
       if is_super_banned(user_id) then
-        print('SuperBanned user talking!')
+        print('>>> banhammer : SuperBanned user talking!')
         superban_user(user_id, chat_id)
         msg.text = ''
-      end
-      if is_banned(user_id, chat_id) then
-        print('Banned user talking!')
+      elseif is_banned(user_id, chat_id) then
+        print('>>> banhammer : Banned user talking!')
         ban_user(user_id, chat_id)
         msg.text = ''
       end
@@ -244,13 +240,13 @@ do
     -- WHITELIST
     -- Allow all sudo users even if whitelist is allowed
     if redis:get('whitelist:enabled') and not is_sudo(msg) then
-      print('Whitelist enabled and not sudo')
+      print('>>> banhammer : Whitelist enabled and not sudo')
       -- Check if user or chat is whitelisted
-      local allowed = is_user_whitelisted(user_id)
+      local allowed = redis:get('whitelist:user#id'..user_id) or false
       if not allowed then
-        print('User '..user_id..' not whitelisted')
+        print('>>> banhammer : User '..user_id..' not whitelisted')
         if is_chat_msg(msg) then
-          allowed = is_chat_whitelisted(chat_id)
+          allowed = redis:get('whitelist:chat#id'..chat_id) or false
           if not allowed then
             print ('Chat '..chat_id..' not whitelisted')
           else
@@ -258,7 +254,7 @@ do
           end
         end
       else
-        print('User '..user_id..' allowed :)')
+        print('>>> banhammer : User '..user_id..' allowed :)')
       end
 
       if not allowed then
@@ -266,15 +262,13 @@ do
       end
 
     else
-      print('Whitelist not enabled or is sudo')
+      print('>>> banhammer : Whitelist not enabled or is sudo')
     end
 
     return msg
   end
 
   local function run(msg, matches)
-
-    vardump(msg)
 
     local receiver = get_receiver(msg)
     local user = 'user#id'..(matches[2] or '')
@@ -349,6 +343,9 @@ do
           end
         end
         if matches[1] == 'whitelist' then
+          if msg.reply_id then
+            msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
+          end
           if matches[2] == 'enable' then
             redis:set('whitelist:enabled', true)
             return 'Enabled whitelist'
@@ -368,6 +365,8 @@ do
             redis:del('whitelist:chat#id'..msg.to.id)
             return 'Chat '..msg.to.id..' removed from whitelist'
           end
+        elseif matches[1] == 'unwhitelist' and msg.reply_id then
+          msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
         end
       end
       if is_admin(msg) then
@@ -417,11 +416,13 @@ do
         '!unban <user_id>/<@username>: Unban user',
         '!kick : If type in reply, will kick user from chat group.',
         '!kick <user_id>/<@username>: Kick user from chat group',
+        '!whitelist : If type in reply, allow user to use the bot when whitelist mode is enabled',
         '!whitelist chat: Allow everybody on current chat to use the bot when whitelist mode is enabled',
         '!whitelist delete chat: Remove chat from whitelist',
         '!whitelist delete user <user_id>: Remove user from whitelist',
         '!whitelist <enable>/<disable>: Enable or disable whitelist mode',
-        '!whitelist user <user_id>: Allow user to use the bot when whitelist mode is enabled'
+        '!whitelist user <user_id>: Allow user to use the bot when whitelist mode is enabled',
+        '!unwhitelist : If type in reply, remove user from whitelist'
       },
     },
     patterns = {
@@ -435,12 +436,14 @@ do
       '^!(kick)$',
       '^!(kickme)$',
       '^!!tgservice (.+)$',
+      '^!(whitelist)$',
       '^!(whitelist) (chat)$',
       '^!(whitelist) (delete) (chat)$',
       '^!(whitelist) (delete) (user) (%d+)$',
       '^!(whitelist) (disable)$',
       '^!(whitelist) (enable)$',
       '^!(whitelist) (user) (%d+)$',
+      '^!(unwhitelist)$',
       '^!(superban)$',
       '^!(superban) (.*)$',
       '^!(superunban)$',
