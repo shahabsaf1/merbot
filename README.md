@@ -23,8 +23,8 @@ Help plugin. Get info from other plugins.
 Know your ID or the ID of a chat members.
 9. **Invite**  
 Invite other user to the chat group.
-10. **Inviteme**  
-Invite Me into a group chat.
+10. **Join**  
+Invite bot into a group chat.
 11. **Moderation**  
 Group moderation, i.e promote, demote and list administrators or moderators of a group.
 12. **Plugins**  
