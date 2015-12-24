@@ -32,7 +32,7 @@ do
       end
     end
     if next(founds) == nil then -- Empty table
-      send_msg(extra.receiver, (extra.name or extra.user)..' not found on this chat.', ok_cb, false)
+      send_large_msg(extra.receiver, (extra.name or extra.user)..' not found on this chat.')
     else
       local text = ''
       for k,user in pairs(founds) do
@@ -42,7 +42,7 @@ do
                ..'User name: @'..(user.username or '')..'\n'
                ..'ID: '..(user.id  or '')..'\n\n'
       end
-      send_msg(extra.receiver, text, ok_cb, false)
+      send_large_msg(extra.receiver, text)
     end
   end
 
@@ -52,7 +52,7 @@ do
                  ..'Last name: '..(result.from.last_name or '')..'\n'
                  ..'User name: @'..(result.from.username or '')..'\n'
                  ..'ID: '..result.from.id
-    send_msg(extra.receiver, text, ok_cb,  true)
+    send_large_msg(extra.receiver, text)
   end
 
   local function returnids(extra, success, result)
