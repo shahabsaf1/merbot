@@ -1,73 +1,79 @@
 --[[
-Invite other user to the chat group.
+
+Invite user into the chat group.
+
+Type !invite by replying to a message to invite replied user.
+Usefull when you want to reinviting kicked user. Most reliable.
 
 Use !invite 1234567890 (where 1234567890 is id_number) to invite a user by id_number.
-This is the most reliable method.
+This is a very reliable method, and if failed, will failed silently.
 
 Use !invite @username to invite a user by @username.
 Less reliable. Some users don't have @username.
 
-Use !invite Type print_name Here to invite a user by print_name.
-Unreliable. Avoid if possible.
-]]--
+Use !invite print_name to invite a user by print_name.
+Unreliable. Avoid if possible. Maybe need an initial communication with the user.
+If print_name is not exist, it will failed silently.
+
+--]]
 
 do
 
-  -- Think it's kind of useless. Just to suppress '*** lua: attempt to call a nil value'
-  local function callback(extra, success, result)
-    if success == 1 and extra ~= false then
-      return extra.text
-    else
-      return send_large_msg(chat, "Can't invite user to this group.")
+  local function invite_user(chat_id, user_id, type_id)
+    if is_super_banned(user_id) or is_banned(user_id, chat_id) then
+      return send_large_msg('chat#id'..chat_id, 'Invitation canceled.\n'
+                            ..'ID'..user_id..' is (super)banned.')
     end
+    chat_add_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, false)
   end
 
   local function resolve_username(extra, success, result)
     if success == 1 then
-      chat_add_user(extra.chat, 'user#id'..result.id, callback, false)
-      return extra.text
+      invite_user('chat#id'..extra.msg.to.id, 'user#id'..result.id, ok_cb, false)
     else
-      return send_large_msg(extra.chat, "Can't invite user to this group.")
+      return send_large_msg('chat#id'..extra.msg.to.id, 'Failed to invite '
+                            ..string.gsub(extra.msg.text, '!invite ', '')
+                            ..' into this group.\nPlease check if username is correct.')
     end
   end
 
   local function action_by_reply(extra, success, result)
-    if success == 1 then
-      chat_add_user('chat#id'..result.to.id, 'user#id'..result.from.id, callback, false)
-    else
-      return send_large_msg('chat#id'..result.to.id, "Can't invite user to this group.")
-    end
+    invite_user(result.to.id, result.from.id, ok_cb, false)
   end
 
   local function run(msg, matches)
-    local receiver = get_receiver(msg)
-    local text = "Add: "..matches[1].." to "..receiver
-    if is_chat_msg(msg) then
+    if is_chat_msg(msg) and is_mod(msg) then
       if msg.reply_id and msg.text == "!invite" then
         msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
       end
       if string.match(matches[1], '^%d+$') then
-        chat_add_user(receiver, 'user#id'..matches[1], callback, {chat=receiver, text=text})
+        invite_user(msg.to.id, matches[1], ok_cb, false)
       elseif string.match(matches[1], '^@.+$') then
-        msgr = res_user(string.gsub(matches[1], '@', ''), resolve_username, {chat=receiver, text=text})
-      else
-        chat_add_user(receiver, string.gsub(matches[1], ' ', '_'), callback, {chat=receiver, text=text})
+        msgr = res_user(string.gsub(matches[1], '@', ''), resolve_username, {msg=msg})
+      elseif string.match(matches[1], '.*$') then
+        -- This one is tricky. Big chance are, you need an initial interaction with <print_name>.
+        chat_add_user('chat#id'..msg.to.id, string.gsub(matches[1], ' ', '_'), ok_cb, false)
       end
     else
-      return 'This isnt a chat group!'
+      return 'This is not a chat group!'
     end
   end
 
   return {
     description = 'Invite other user to the chat group.',
     usage = {
-      -- Need space in front of this, so bot won't consider it as a command
-      ' !invite [id|user_name|name]'
+      moderator = {
+        -- Need space in front of this, so bot won't consider it as a command
+        ' !invite : If type by replying, bot will then inviting the replied user.',
+        ' !invite <user_id> : Invite by their user_id.',
+        ' !invite @<user_name> : Invite by their @<user_name>.',
+        ' !invite <print_name> : Invite by their print_name.'
+      },
     },
     patterns = {
-      "^!invite$",
-      "^!invite (.*)$",
-      "^!invite (%d+)$"
+      '^!invite$',
+      '^!invite (.*)$',
+      '^!invite (%d+)$'
     },
     run = run,
     moderated = true
