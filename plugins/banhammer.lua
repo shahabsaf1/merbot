@@ -8,7 +8,7 @@ do
 
   local function kick_user(user_id, chat_id)
     if user_id == tostring(our_id) then
-      send_msg('chat#id'..chat_id, 'I won\'t kick myself!', ok_cb,  true)
+      send_large_msg('chat#id'..chat_id, 'I won\'t kick myself!')
     else
       chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, true)
     end
@@ -47,10 +47,10 @@ do
           local full_name = (v.first_name or '')..' '..(v.last_name or '')
           if matches[1] == 'ban' then
             ban_user(matches[2], chat_id)
-            send_msg(receiver, full_name..' ['..matches[2]..'] banned', ok_cb,  true)
+            send_large_msg(receiver, full_name..' ['..matches[2]..'] banned')
           elseif matches[1] == 'superban' then
             superban_user(matches[2], chat_id)
-            send_msg(receiver, full_name..' ['..matches[2]..'] globally banned!', ok_cb, true)
+            send_large_msg(receiver, full_name..' ['..matches[2]..'] globally banned!')
           elseif matches[1] == 'kick' then
             kick_user(matches[2], chat_id)
           end
@@ -59,20 +59,20 @@ do
       if matches[1] == 'unban' then
         if is_banned(matches[2], chat_id) then
           unban_user(matches[2], chat_id)
-          send_msg(receiver, 'User with ID ['..matches[2]..'] is unbanned.')
+          send_large_msg(receiver, 'User with ID ['..matches[2]..'] is unbanned.')
         else
-          send_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
+          send_large_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
         end
       elseif matches[1] == 'superunban' then
         if is_super_banned(matches[2]) then
           superunban_user(matches[2], chat_id)
-          send_msg(receiver, 'User with ID ['..matches[2]..'] is globally unbanned.')
+          send_large_msg(receiver, 'User with ID ['..matches[2]..'] is globally unbanned.')
         else
-          send_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
+          send_large_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
         end
       end
       if not group_member then
-        send_msg(receiver, 'No user with ID '..matches[2]..' in this group.')
+        send_large_msg(receiver, 'No user with ID '..matches[2]..' in this group.')
       end
     end
   end
@@ -86,22 +86,22 @@ do
         chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, false)
       elseif extra.match == 'ban' then
         ban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, 'User '..user_id..' banned', ok_cb, true)
+        send_large_msg('chat#id'..chat_id, 'User '..user_id..' banned')
       elseif extra.match == 'superban' then
         superban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally banned!')
+        send_large_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally banned!')
       elseif extra.match == 'unban' then
         unban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, 'User '..user_id..' unbanned', ok_cb, true)
+        send_large_msg('chat#id'..chat_id, 'User '..user_id..' unbanned')
       elseif extra.match == 'superunban' then
         superunban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally unbanned!')
+        send_large_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally unbanned!')
       elseif extra.match == 'whitelist' then
         redis:set('whitelist:user#id'..user_id, true)
-        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] whitelisted', ok_cb, true)
+        send_large_msg('chat#id'..chat_id, full_name..' ['..user_id..'] whitelisted')
       elseif extra.match == 'unwhitelist' then
         redis:del('whitelist:user#id'..user_id)
-        send_msg('chat#id'..chat_id, full_name..' ['..user_id..'] removed from whitelist', ok_cb, true)
+        send_large_msg('chat#id'..chat_id, full_name..' ['..user_id..'] removed from whitelist')
       end
     else
       return 'Use This in Your Groups'
@@ -109,6 +109,8 @@ do
   end
 
   local function resolve_username(extra, success, result)
+    vardump(extra)
+    vardump(result)
     local chat_id = extra.msg.to.id
     if result ~= false then
       local user_id = result.id
@@ -126,23 +128,23 @@ do
             chat_del_user('chat#id'..chat_id, 'user#id'..result.id, ok_cb, false)
           elseif extra.match == 'ban' then
             ban_user(user_id, chat_id)
-            send_msg('chat#id'..chat_id, 'User @'..username..' banned', ok_cb,  true)
+            send_large_msg('chat#id'..chat_id, 'User @'..username..' banned')
           elseif extra.match == 'superban' then
             superban_user(user_id, chat_id)
-            send_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally banned!', ok_cb,  true)
+            send_large_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally banned!')
           elseif extra.match == 'unban' then
             unban_user(user_id, chat_id)
-            send_msg('chat#id'..chat_id, 'User @'..username..' unbanned', ok_cb,  true)
+            send_large_msg('chat#id'..chat_id, 'User @'..username..' unbanned', ok_cb,  true)
           elseif extra.match == 'superunban' then
             superunban_user(user_id, chat_id)
-            send_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally unbanned!', ok_cb,  true)
+            send_large_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally unbanned!')
           end
         end
       else
         return 'Use This in Your Groups.'
       end
     else
-      send_msg('chat#id'..chat_id, 'No user @'..extra.user..' in this group.')
+      send_large_msg('chat#id'..chat_id, 'No user '..string.gsub(extra.msg.text, '^.- ', '')..' in this group.')
     end
   end
 
@@ -152,10 +154,10 @@ do
     if not redis:get('kicked:'..chat_id..':'..user_id) or false then
       if anti_spam_stat == 'kick' then
         kick_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder, ok_cb, true)
+        send_large_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder)
       elseif anti_spam_stat == 'ban' then
         ban_user(user_id, chat_id)
-        send_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder..'. Banned', ok_cb, true)
+        send_large_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder..'. Banned')
       end
       -- hackish way to avoid mulptiple kicking
       redis:setex('kicked:'..chat_id..':'..user_id, 2, 'true')
@@ -200,7 +202,7 @@ do
     if msg.action and msg.action.type then
       local action = msg.action.type
       -- Check if banned user joins chat
-      if action == 'chat_add_user' or action == 'chat_add_user_link' then        
+      if action == 'chat_add_user' or action == 'chat_add_user_link' then
         if msg.action.link_issuer then
           user_id = msg.from.id
         else
