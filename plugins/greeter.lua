@@ -14,14 +14,6 @@ Disable welcome service. Also, you can just disable greeter plugin.
 
 do
 
-  local function is_banned(user_id, chat_id)
-    return redis:get('banned:'..chat_id..':'..user_id) or false
-  end
-
-  local function is_super_banned(user_id)
-      return redis:get('superbanned:'..user_id) or false
-  end
-
   local function run(msg, matches)
 
     local data = load_data(_config.moderation.data)

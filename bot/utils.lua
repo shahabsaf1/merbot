@@ -204,6 +204,13 @@ function is_mod(msg)
   return var
 end
 
+function is_banned(user_id, chat_id)
+  return redis:get('banned:'..chat_id..':'..user_id) or false
+end
+
+function is_super_banned(user_id)
+  return redis:get('superbanned:'..user_id) or false
+end
 
 -- Returns the name of the sender
 function get_name(msg)

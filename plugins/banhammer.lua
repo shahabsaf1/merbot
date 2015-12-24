@@ -26,10 +26,6 @@ do
     kick_user(user_id, chat_id)
   end
 
-  local function is_super_banned(user_id)
-    return redis:get('superbanned:'..user_id) or false
-  end
-
   local function unban_user(user_id, chat_id)
     redis:del('banned:'..chat_id..':'..user_id)
   end
@@ -37,10 +33,6 @@ do
   local function superunban_user(user_id, chat_id)
     redis:del('superbanned:'..user_id)
     return 'User '..user_id..' unbanned'
-  end
-
-  local function is_banned(user_id, chat_id)
-    return redis:get('banned:'..chat_id..':'..user_id) or false
   end
 
   local function action_by_id(extra, success, result)
