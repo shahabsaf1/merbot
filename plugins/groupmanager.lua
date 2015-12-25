@@ -302,8 +302,8 @@ do
           local user = 'user#id'..msg.action.user.id
           if settings.lock_member == 'yes' then
             chat_del_user(get_receiver(msg), user, ok_cb, true)
-          -- no APIs bot are allowed to enter chat group.
-          elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 then
+          -- no APIs bot are allowed to enter chat group, except invited by mods.
+          elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 and not is_mod(msg) then
             chat_del_user(get_receiver(msg), user, ok_cb, true)
           elseif settings.lock_bots == 'no' or settings.lock_member == 'no' then
             return nil
