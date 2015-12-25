@@ -7,11 +7,16 @@ do
   local TIME_CHECK = 4
 
   local function kick_user(user_id, chat_id)
-    if user_id == tostring(our_id) then
-      send_large_msg('chat#id'..chat_id, 'I won\'t kick myself!')
-    else
-      chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, true)
+    -- check if user was kicked in the last TIME_CHECK seconds
+    if not redis:get('kicked:'..chat_id..':'..user_id) or false then
+      if user_id == tostring(our_id) then
+        send_large_msg('chat#id'..chat_id, 'I won\'t kick myself!')
+      else
+        chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, true)
+      end
     end
+    -- set for TIME_CHECK seconds that user have been kicked
+    redis:setex('kicked:'..chat_id..':'..user_id, TIME_CHECK, 'true')
   end
 
   local function ban_user(user_id, chat_id)
@@ -151,16 +156,12 @@ do
   local function trigger_anti_splooder(user_id, chat_id, splooder)
     local data = load_data(_config.moderation.data)
     local anti_spam_stat = data[tostring(chat_id)]['settings']['anti_flood']
-    if not redis:get('kicked:'..chat_id..':'..user_id) or false then
-      if anti_spam_stat == 'kick' then
-        kick_user(user_id, chat_id)
-        send_large_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder)
-      elseif anti_spam_stat == 'ban' then
-        ban_user(user_id, chat_id)
-        send_large_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder..'. Banned')
-      end
-      -- hackish way to avoid mulptiple kicking
-      redis:setex('kicked:'..chat_id..':'..user_id, 2, 'true')
+    if anti_spam_stat == 'kick' then
+      kick_user(user_id, chat_id)
+      send_large_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder)
+    elseif anti_spam_stat == 'ban' then
+      ban_user(user_id, chat_id)
+      send_large_msg('chat#id'..chat_id, 'User '..user_id..' is '..splooder..'. Banned')
     end
     msg = nil
   end
