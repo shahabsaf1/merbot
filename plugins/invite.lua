@@ -19,7 +19,7 @@ If print_name is not exist, it will failed silently.
 
 do
 
-  local function invite_user(chat_id, user_id, type_id)
+  local function invite_user(chat_id, user_id)
     if is_super_banned(user_id) or is_banned(user_id, chat_id) then
       return send_large_msg('chat#id'..chat_id, 'Invitation canceled.\n'
                             ..'ID'..user_id..' is (super)banned.')
@@ -29,7 +29,7 @@ do
 
   local function resolve_username(extra, success, result)
     if success == 1 then
-      invite_user('chat#id'..extra.msg.to.id, 'user#id'..result.id, ok_cb, false)
+      invite_user(extra.msg.to.id, result.id)
     else
       return send_large_msg('chat#id'..extra.msg.to.id, 'Failed to invite '
                             ..string.gsub(extra.msg.text, '!invite ', '')
@@ -38,7 +38,7 @@ do
   end
 
   local function action_by_reply(extra, success, result)
-    invite_user(result.to.id, result.from.id, ok_cb, false)
+    invite_user(result.to.id, result.from.id)
   end
 
   local function run(msg, matches)
@@ -47,7 +47,7 @@ do
         msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
       end
       if string.match(matches[1], '^%d+$') then
-        invite_user(msg.to.id, matches[1], ok_cb, false)
+        invite_user(msg.to.id, matches[1])
       elseif string.match(matches[1], '^@.+$') then
         msgr = res_user(string.gsub(matches[1], '@', ''), resolve_username, {msg=msg})
       elseif string.match(matches[1], '.*$') then
