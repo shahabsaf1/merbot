@@ -302,14 +302,14 @@ do
           local user = 'user#id'..msg.action.user.id
           if settings.lock_member == 'yes' then
             chat_del_user(get_receiver(msg), user, ok_cb, true)
-          -- no APIs bot are allowed to enter chat group.
-          elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 then
+          -- no APIs bot are allowed to enter chat group, except invited by mods.
+          elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 and not is_mod(msg) then
             chat_del_user(get_receiver(msg), user, ok_cb, true)
           elseif settings.lock_bots == 'no' or settings.lock_member == 'no' then
             return nil
           end
         -- if sticker is sent
-        elseif msg.media and msg.media.caption == 'sticker.webp' and not is_mod(msg) then
+        elseif msg.media and msg.media.caption == 'sticker.webp' and not is_sudo(msg) then
           local user_id = msg.from.id
           local chat_id = msg.to.id
           local sticker_hash = 'mer_sticker:'..chat_id..':'..user_id
