@@ -309,7 +309,7 @@ do
             return nil
           end
         -- if sticker is sent
-        elseif msg.media and msg.media.caption == 'sticker.webp' and not is_mod(msg) then
+        elseif msg.media and msg.media.caption == 'sticker.webp' and not is_sudo(msg) then
           local user_id = msg.from.id
           local chat_id = msg.to.id
           local sticker_hash = 'mer_sticker:'..chat_id..':'..user_id
