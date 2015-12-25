@@ -5,33 +5,33 @@
 
 **Merbot** is a dedicated Telegram group manager bot based on [telegram-bot](https://github.com/yagop/telegram-bot) by [Yago Pérez](https://telegram.me/yago_perez) and [uzzbot](https://github.com/uziins/uzzbot) by [@silenceangel](https://telegram.me/silenceangel).
 
-1. **Autoleave**  
+1. [**Autoleave**](https://github.com/rizaumami/merbot/wiki/Plugins#autoleave)  
 So the bot will kick itself when invited to unmanaged groups.
-2. **Banhammer**  
+2. [**Banhammer**](https://github.com/rizaumami/merbot/wiki/Plugins#banhammer)  
 Manage bans, kicks and white/black lists.
-3. **Bin**  
+3. [**Bin**](https://github.com/rizaumami/merbot/wiki/Plugins#bin)  
 Run system commands.
-4. **Channels**  
+4. [**Channels**](https://github.com/rizaumami/merbot/wiki/Plugins#channels)  
 Manage channels. Enable or disable channel.
-5. **Greeter**  
+5. [**Greeter**](https://github.com/rizaumami/merbot/wiki/Plugins#greeter)  
 Sends a custom message when a user enters or leave a chat.
-6. **Group Manager**  
+6. [**Group Manager**](https://github.com/rizaumami/merbot/wiki/Plugins#groupmanager)  
 Manage group chat.
-7. **Help**  
+7. [**Help**](https://github.com/rizaumami/merbot/wiki/Plugins#help)  
 Help plugin. Get info from other plugins.
-8. **Id**  
+8. [**Id**](https://github.com/rizaumami/merbot/wiki/Plugins#id)  
 Know your ID or the ID of a chat members.
-9. **Invite**  
+9. [**Invite**](https://github.com/rizaumami/merbot/wiki/Plugins#invite)  
 Invite other user to the chat group.
-10. **Join**  
+10. [**Join**](https://github.com/rizaumami/merbot/wiki/Plugins#join)  
 Invite bot into a group chat.
-11. **Moderation**  
+11. [**Moderation**](https://github.com/rizaumami/merbot/wiki/Plugins#moderation)  
 Group moderation, i.e promote, demote and list administrators or moderators of a group.
-12. **Plugins**  
+12. [**Plugins**](https://github.com/rizaumami/merbot/wiki/Plugins#plugins)  
 Plugin to manage other plugins. Enable, disable or reload.
-13. **Stats**  
+13. [**Stats**](https://github.com/rizaumami/merbot/wiki/Plugins#stats)  
 Update users stats.
-14. **Version**  
+14. [**Version**](https://github.com/rizaumami/merbot/wiki/Plugins#version)  
 Shows bot version.
 
 Consult [wiki](https://github.com/rizaumami/merbot/wiki/Plugins) to know how to use those plugins.
