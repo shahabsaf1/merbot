@@ -7,10 +7,10 @@ do
                      ..';'..(msg.from.first_name or '')..(msg.from.last_name or '')
                      ..';@'..(msg.from.username or '')..';'..msg.from.id..';'
                      ..msg.text..'\n'
-      local log_file = io.open(log_file, 'a')
+      local file = io.open(log_file, 'a')
 
-      log_file:write(logtxt)
-      log_file:close()
+      file:write(logtxt)
+      file:close()
 
       if is_mod(msg) then
         if matches[1] == 'get' then
