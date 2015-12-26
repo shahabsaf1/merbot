@@ -5,7 +5,7 @@ do
     for k,v in pairs(result.members) do
       if v.id ~= our_id then
         data[tostring(extra.msg.to.id)] = {
-          moderators = {[tostring(v.id)] = v.username},
+          moderators = {[tostring(v.id)] = '@'..v.username},
           settings = {
             set_name = string.gsub(extra.msg.to.print_name, '_', ' '),
             lock_bots = 'no',
@@ -20,34 +20,6 @@ do
         save_data(_config.moderation.data, data)
         return send_large_msg(get_receiver(extra.msg), 'You have been promoted as moderator for this group.')
       end
-    end
-  end
-
-  local function automodadd(msg)
-    local data = load_data(_config.moderation.data)
-    if msg.action.type == 'chat_created' then
-      chat_info(get_receiver(msg), check_member,{data=data, msg=msg})
-    else
-      if data[tostring(msg.to.id)] then
-        return 'Group is already added.'
-      end
-      local username = msg.from.username or msg.from.print_name
-      -- create data array in moderation.json
-      data[tostring(msg.to.id)] = {
-        moderators ={[tostring(msg.from.id)] = '@'..username},
-        settings = {
-          set_name = string.gsub(msg.to.print_name, '_', ' '),
-          lock_bots = 'no',
-          lock_name = 'yes',
-          lock_photo = 'no',
-          lock_member = 'no',
-          anti_flood = 'ban',
-          welcome = 'group',
-          sticker = 'ok',
-          }
-        }
-      save_data(_config.moderation.data, data)
-      return 'Group has been added, and @'..username..' has been promoted as moderator for this group.'
     end
   end
 
@@ -152,7 +124,7 @@ do
       member_username = full_name
     end
     local member_id = msg.from.id
-    if msg.to.type == 'chat' and not is_sudo(msg) then
+    if msg.to.type == 'chat' and not is_sudo(member_id) then
       if extra.msg.text == '!promote' then
         return promote(get_receiver(msg), member_username, member_id)
       elseif extra.msg.text == '!demote' then
@@ -172,7 +144,7 @@ do
     local receiver = get_receiver(msg)
 
     if is_chat_msg(msg) then
-      if is_mod(msg) then
+      if is_mod(msg.from.id, msg.to.id) then
         if matches[1] == 'promote' then
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
@@ -217,7 +189,7 @@ do
           return message
         end
       end
-      if is_admin(msg) then
+      if is_admin(msg.from.id, msg.to.id) then
         if matches[1] == 'adminprom' then
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
@@ -261,10 +233,32 @@ do
       return 'Only works on group'
     end
 
-    if matches[1] == 'chat_add_user' and msg.action.user.id == our_id then
-      return automodadd(msg)
-    elseif matches[1] == 'chat_created' and msg.from.id == 0 then
-      return automodadd(msg)
+    if matches[1] == 'chat_created' and msg.from.id == 0 then
+      local data = load_data(_config.moderation.data)
+      if msg.action.type == 'chat_created' then
+        chat_info(get_receiver(msg), check_member,{data=data, msg=msg})
+      else
+        if data[tostring(msg.to.id)] then
+          return 'Group is already added.'
+        end
+        local username = msg.from.username or msg.from.print_name
+        -- create data array in moderation.json
+        data[tostring(msg.to.id)] = {
+          moderators ={[tostring(msg.from.id)] = '@'..username},
+          settings = {
+            set_name = string.gsub(msg.to.print_name, '_', ' '),
+            lock_bots = 'no',
+            lock_name = 'yes',
+            lock_photo = 'no',
+            lock_member = 'no',
+            anti_flood = 'ban',
+            welcome = 'group',
+            sticker = 'ok',
+            }
+          }
+        save_data(_config.moderation.data, data)
+        return 'Group has been added, and @'..username..' has been promoted as moderator for this group.'
+      end
     end
   end
 

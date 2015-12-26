@@ -159,7 +159,7 @@ local function run(msg, matches)
       return print_subs(id)
    end
    if matches[1] == "sync" then
-      if not is_sudo(msg) then
+      if not is_sudo(msg.from.id) then
          return "Only sudo users can sync the RSS."
       end
       cron()

@@ -91,13 +91,13 @@ end
 
 local function run(msg, matches)
   if matches[1] == 'cron delete' then
-    if not is_sudo(msg) then 
+    if not is_sudo(msg.from.id) then 
       return 'This command requires privileged user'
     end
     return save_cron(msg, matches[2], true)
 
   elseif matches[1] == 'cron' then
-    if not is_sudo(msg) then 
+    if not is_sudo(msg.from.id) then 
       return 'This command requires privileged user'
     end
     return save_cron(msg, matches[2])

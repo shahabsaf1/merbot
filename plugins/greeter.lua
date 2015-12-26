@@ -20,7 +20,7 @@ do
 
     if data[tostring(msg.to.id)] then
       local welcome_stat = data[tostring(msg.to.id)]['settings']['welcome']
-      if matches[1] == 'welcome' and is_mod(msg) then
+      if matches[1] == 'welcome' and is_mod(msg.from.id, msg.to.id) then
         if matches[2] == 'group' and welcome_stat ~= 'group' then
           data[tostring(msg.to.id)]['settings']['welcome'] = 'group'
           save_data(_config.moderation.data, data)

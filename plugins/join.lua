@@ -32,7 +32,7 @@ do
   end
 
   function run(msg, matches)
-    if is_sudo(msg) then
+    if is_sudo(msg.from.id) then
       if msg.reply_id then
         msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
       elseif matches[1] then

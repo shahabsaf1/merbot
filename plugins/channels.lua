@@ -25,7 +25,7 @@ do
 
   local function pre_process(msg)
 	  -- If sender is a moderator then re-enable the channel
-	  if is_mod(msg) then
+	  if is_mod(msg.from.id, msg.to.id) then
 	    if msg.text == '!channel enable' then
 	      enable_channel(get_receiver(msg))
 	    end

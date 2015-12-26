@@ -149,11 +149,11 @@ function run_command(str)
 end
 
 -- User has privileges
-function is_sudo(msg)
+function is_sudo(user_id)
   local var = false
   -- Check users id in config
   for v,user in pairs(_config.sudo_users) do
-    if user == msg.from.id then
+    if user == user_id then
       var = true
     end
   end
@@ -161,18 +161,16 @@ function is_sudo(msg)
 end
 
 -- user has admins privileges
-function is_admin(msg)
+function is_admin(user_id, chat_id)
   local var = false
   local data = load_data(_config.moderation.data)
-  local user = msg.from.id
-  local admins = 'admins'
-  if data[tostring(admins)] then
-    if data[tostring(admins)][tostring(user)] then
+  if data[tostring('admins')] then
+    if data[tostring('admins')][tostring(user_id)] then
       var = true
     end
   end
   for v,user in pairs(_config.sudo_users) do
-    if user == msg.from.id then
+    if user == user_id then
         var = true
     end
   end
@@ -180,24 +178,23 @@ function is_admin(msg)
 end
 
 -- user has moderator privileges
-function is_mod(msg)
+function is_mod(user_id, chat_id)
   local var = false
   local data = load_data(_config.moderation.data)
-  local user = msg.from.id
-  if data[tostring(msg.to.id)] then
-    if data[tostring(msg.to.id)]['moderators'] then
-      if data[tostring(msg.to.id)]['moderators'][tostring(user)] then
+  if data[tostring(chat_id)] then
+    if data[tostring(chat_id)]['moderators'] then
+      if data[tostring(chat_id)]['moderators'][tostring(user_id)] then
         var = true
       end
     end
   end
   if data['admins'] then
-    if data['admins'][tostring(user)] then
+    if data['admins'][tostring(user_id)] then
       var = true
     end
   end
   for v,user in pairs(_config.sudo_users) do
-    if user == msg.from.id then
+    if user == user_id then
         var = true
     end
   end
@@ -440,15 +437,15 @@ end
 -- Check if user can use the plugin
 function user_allowed(plugin, msg)
   -- If plugins moderated = true
-  if plugin.moderated and not is_mod(msg) then -- Check if user is a mod
-    if plugin.moderated and not is_admin(msg) then -- Check if user is an admin
-      if plugin.moderated and not is_sudo(msg) then -- Check if user is a sudoer
+  if plugin.moderated and not is_mod(msg.from.id, msg.to.id) then -- Check if user is a mod
+    if plugin.moderated and not is_admin(msg.from.id, msg.to.id) then -- Check if user is an admin
+      if plugin.moderated and not is_sudo(msg.from.id) then -- Check if user is a sudoer
         return false
       end
     end
   end
   -- If plugins privileged = true
-  if plugin.privileged and not is_sudo(msg) then
+  if plugin.privileged and not is_sudo(msg.from.id) then
     return false
   end
   return true

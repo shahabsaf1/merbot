@@ -5,7 +5,7 @@ do
       local logtxt = os.date('%F;%T', msg.date)..';'..msg.to.title..';'..msg.to.id
                      ..';'..(msg.from.first_name or '')..(msg.from.last_name or '')
                      ..';@'..(msg.from.username or '')..';'..msg.from.id..';'
-                     ..msg.text..'\n'
+                     ..(msg.text or msg.media.type..':'..(msg.media.caption or ''))..'\n'
       local file = io.open('./data/logs/'..msg.to.id..'_log.csv', 'a')
       file:write(logtxt)
       file:close()
@@ -14,7 +14,7 @@ do
   end
 
   function run(msg, matches)
-    if is_mod(msg) then
+    if is_mod(msg.from.id, msg.to.id) then
       if matches[1] == 'get' then
         send_document('chat#id'..msg.to.id, './data/logs/'..msg.to.id..'_log.csv', ok_cb, false)
       elseif matches[1] == 'pm' then

@@ -53,11 +53,11 @@ do
       local data = load_data(_config.moderation.data)
 
       -- create a group
-      if matches[1] == 'mkgroup' and matches[2] and is_mod(msg) then
+      if matches[1] == 'mkgroup' and matches[2] and is_mod(msg.from.id, msg.to.id) then
         create_group_chat (msg.from.print_name, matches[2], ok_cb, false)
 	      return 'Group '..string.gsub(matches[2], '_', ' ')..' has been created.'
       -- add a group to be moderated
-      elseif matches[1] == 'addgroup' and is_admin(msg) then
+      elseif matches[1] == 'addgroup' and is_admin(msg.from.id, msg.to.id) then
         if data[tostring(msg.to.id)] then
           return 'Group is already added.'
         end
@@ -78,7 +78,7 @@ do
         save_data(_config.moderation.data, data)
         return 'Group has been added.'
       -- remove group from moderation
-      elseif matches[1] == 'remgroup' and is_admin(msg) then
+      elseif matches[1] == 'remgroup' and is_admin(msg.from.id, msg.to.id) then
         if not data[tostring(msg.to.id)] then
           return 'Group is not added.'
         end
@@ -87,7 +87,7 @@ do
         return 'Group has been removed'
       end
 
-      if msg.media and is_chat_msg(msg) and is_mod(msg) then
+      if msg.media and is_chat_msg(msg) and is_mod(msg.from.id, msg.to.id) then
         if msg.media.type == 'photo' and data[tostring(msg.to.id)] then
           if data[tostring(msg.to.id)]['settings']['set_photo'] == 'waiting' then
             load_photo(msg.id, set_group_photo, msg)
@@ -99,13 +99,13 @@ do
 
         local settings = data[tostring(msg.to.id)]['settings']
 
-        if matches[1] == 'setabout' and matches[2] and is_mod(msg) then
+        if matches[1] == 'setabout' and matches[2] and is_mod(msg.from.id, msg.to.id) then
 	        data[tostring(msg.to.id)]['description'] = matches[2]
 	        save_data(_config.moderation.data, data)
 	        return 'Set group description to:\n'..matches[2]
         elseif matches[1] == 'about' then
           return get_description(msg, data)
-        elseif matches[1] == 'setrules' and is_mod(msg) then
+        elseif matches[1] == 'setrules' and is_mod(msg.from.id, msg.to.id) then
 	        data[tostring(msg.to.id)]['rules'] = matches[2]
 	        save_data(_config.moderation.data, data)
 	        return 'Set group rules to:\n'..matches[2]
@@ -126,13 +126,13 @@ do
             else
               return 'Invite link does not exist.\nTry !link set to generate.'
             end
-          elseif matches[2] == 'set' and is_mod(msg) then
+          elseif matches[2] == 'set' and is_mod(msg.from.id, msg.to.id) then
             msgr = export_chat_link(get_receiver(msg), export_chat_link_cb, {data=data, msg=msg})
           end
 	      elseif matches[1] == 'group' then
           -- lock {bot|name|member|photo|sticker}
           if matches[2] == 'lock' then
-            if matches[3] == 'bot' and is_mod(msg) then
+            if matches[3] == 'bot' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_bots == 'yes' then
                 return 'Group is already locked from bots.'
 	            else
@@ -140,7 +140,7 @@ do
                 save_data(_config.moderation.data, data)
                 return 'Group is locked from bots.'
 	            end
-            elseif matches[3] == 'name' and is_mod(msg) then
+            elseif matches[3] == 'name' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_name == 'yes' then
                 return 'Group name is already locked'
 	            else
@@ -150,7 +150,7 @@ do
                 save_data(_config.moderation.data, data)
 	              return 'Group name has been locked'
 	            end
-            elseif matches[3] == 'member' and is_mod(msg) then
+            elseif matches[3] == 'member' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_member == 'yes' then
                 return 'Group members are already locked'
 	            else
@@ -158,7 +158,7 @@ do
                 save_data(_config.moderation.data, data)
 	            end
 	            return 'Group members has been locked'
-            elseif matches[3] == 'photo' and is_mod(msg) then
+            elseif matches[3] == 'photo' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_photo == 'yes' then
                 return 'Group photo is already locked'
 	            else
@@ -169,7 +169,7 @@ do
             end
           -- unlock {bot|name|member|photo|sticker}
 		      elseif matches[2] == 'unlock' then
-            if matches[3] == 'bot' and is_mod(msg) then
+            if matches[3] == 'bot' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_bots == 'no' then
                 return 'Bots are allowed to enter group.'
 	            else
@@ -177,7 +177,7 @@ do
                 save_data(_config.moderation.data, data)
                 return 'Group is open for bots.'
 	            end
-            elseif matches[3] == 'name' and is_mod(msg) then
+            elseif matches[3] == 'name' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_name == 'no' then
                 return 'Group name is already unlocked'
 	            else
@@ -185,7 +185,7 @@ do
                 save_data(_config.moderation.data, data)
                 return 'Group name has been unlocked'
 	            end
-            elseif matches[3] == 'member' and is_mod(msg) then
+            elseif matches[3] == 'member' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_member == 'no' then
                 return 'Group members are not locked'
 	            else
@@ -193,7 +193,7 @@ do
                 save_data(_config.moderation.data, data)
                 return 'Group members has been unlocked'
 	            end
-            elseif matches[3] == 'photo' and is_mod(msg) then
+            elseif matches[3] == 'photo' and is_mod(msg.from.id, msg.to.id) then
 	            if settings.lock_photo == 'no' then
                 return 'Group photo is not locked'
 	            else
@@ -203,7 +203,7 @@ do
 	            end
             end
           -- view group settings
-          elseif matches[2] == 'settings' and is_mod(msg) then
+          elseif matches[2] == 'settings' and is_mod(msg.from.id, msg.to.id) then
             if settings.lock_bots == 'yes' then
               lock_bots_state = '🔒'
             elseif settings.lock_bots == 'no' then
@@ -285,12 +285,12 @@ do
             return nil
           end
 		    -- set group name
-		    elseif matches[1] == 'setname' and is_mod(msg) then
+		    elseif matches[1] == 'setname' and is_mod(msg.from.id, msg.to.id) then
           settings.set_name = string.gsub(matches[2], '_', ' ')
           save_data(_config.moderation.data, data)
           rename_chat(get_receiver(msg), settings.set_name, ok_cb, false)
 		    -- set group photo
-		    elseif matches[1] == 'setphoto' and is_mod(msg) then
+		    elseif matches[1] == 'setphoto' and is_mod(msg.from.id, msg.to.id) then
           settings.set_photo = 'waiting'
           save_data(_config.moderation.data, data)
           return 'Please send me new group photo now'
@@ -303,13 +303,13 @@ do
           if settings.lock_member == 'yes' then
             chat_del_user(get_receiver(msg), user, ok_cb, true)
           -- no APIs bot are allowed to enter chat group, except invited by mods.
-          elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 and not is_mod(msg) then
+          elseif settings.lock_bots == 'yes' and msg.action.user.flags == 4352 and not is_mod(msg.from.id, msg.to.id) then
             chat_del_user(get_receiver(msg), user, ok_cb, true)
           elseif settings.lock_bots == 'no' or settings.lock_member == 'no' then
             return nil
           end
         -- if sticker is sent
-        elseif msg.media and msg.media.caption == 'sticker.webp' and not is_sudo(msg) then
+        elseif msg.media and msg.media.caption == 'sticker.webp' and not is_sudo(msg.from.id) then
           local user_id = msg.from.id
           local chat_id = msg.to.id
           local sticker_hash = 'mer_sticker:'..chat_id..':'..user_id

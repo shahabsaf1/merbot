@@ -148,7 +148,7 @@ local function run(msg, matches)
     end
 
     if matches[2] == "bot" then
-      if not is_sudo(msg) then
+      if not is_sudo(msg.from.id) then
         return "Bot stats requires privileged user"
       else
         return bot_stats()
@@ -156,7 +156,7 @@ local function run(msg, matches)
     end
 
     if matches[2] == "chat" then
-      if not is_sudo(msg) then
+      if not is_sudo(msg.from.id) then
         return "This command requires privileged user"
       else
         return chat_stats(matches[3])

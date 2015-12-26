@@ -129,11 +129,11 @@ local function help_all(requester)
 end
  
 local function run(msg, matches)
-  if is_sudo(msg) then
+  if is_sudo(msg.from.id) then
     requester = "sudo"
-  elseif is_admin(msg) then
+  elseif is_admin(msg.from.id, msg.to.id) then
     requester = "admin"
-  elseif is_mod(msg) then
+  elseif is_mod(msg.from.id, msg.to.id) then
     requester = "moderator"
   else
     requester = "user"

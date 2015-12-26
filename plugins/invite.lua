@@ -42,7 +42,7 @@ do
   end
 
   local function run(msg, matches)
-    if is_chat_msg(msg) and is_mod(msg) then
+    if is_chat_msg(msg) and is_mod(msg.from.id, msg.to.id) then
       if msg.reply_id and msg.text == "!invite" then
         msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
       end

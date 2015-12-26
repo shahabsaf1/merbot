@@ -9,7 +9,7 @@
 do
 
 function run(msg, matches)
-  if is_sudo(msg) then
+  if is_sudo(msg.from.id) then
 		return io.popen(matches[1]):read('*all')
   end
 end

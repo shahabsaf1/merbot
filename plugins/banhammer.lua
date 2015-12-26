@@ -5,6 +5,9 @@ do
   -- make sure to set with value that not higher than stats.lua
   local NUM_MSG_MAX = 4  -- Max number of messages per TIME_CHECK seconds
   local TIME_CHECK = 4
+  local NO_KICK = 'I will not kick myself, sudoers, admins or moderators!'
+  local NO_BAN = 'I will not ban myself, sudoers, admins or moderators!'
+  local NO_SUPERBAN = 'I will not superban myself, sudoers, admins or moderators!'
 
   local function kick_user(user_id, chat_id)
     -- check if user was kicked in the last TIME_CHECK seconds
@@ -44,40 +47,51 @@ do
     if success == 1 then
       local matches = extra.matches
       local chat_id = result.id
-      local receiver = 'chat#id'..chat_id
       local group_member = false
       for k,v in pairs(result.members) do
         if matches[2] == tostring(v.id) then
           group_member = true
           local full_name = (v.first_name or '')..' '..(v.last_name or '')
           if matches[1] == 'ban' then
-            ban_user(matches[2], chat_id)
-            send_large_msg(receiver, full_name..' ['..matches[2]..'] banned')
+            if is_mod(matches[2], chat_id) then
+              send_large_msg('chat#id'..chat_id, NO_BAN)
+            else
+              ban_user(matches[2], chat_id)
+              send_large_msg('chat#id'..chat_id, full_name..' ['..matches[2]..'] banned')
+            end
           elseif matches[1] == 'superban' then
-            superban_user(matches[2], chat_id)
-            send_large_msg(receiver, full_name..' ['..matches[2]..'] globally banned!')
+            if is_mod(matches[2], chat_id) then
+              send_large_msg('chat#id'..chat_id, NO_SUPERBAN)
+            else
+              superban_user(matches[2], chat_id)
+              send_large_msg('chat#id'..chat_id, full_name..' ['..matches[2]..'] globally banned!')
+            end
           elseif matches[1] == 'kick' then
-            kick_user(matches[2], chat_id)
+            if is_mod(matches[2], chat_id) then
+              send_large_msg('chat#id'..chat_id, NO_KICK)
+            else
+              kick_user(matches[2], chat_id)
+            end
           end
         end
       end
       if matches[1] == 'unban' then
         if is_banned(matches[2], chat_id) then
           unban_user(matches[2], chat_id)
-          send_large_msg(receiver, 'User with ID ['..matches[2]..'] is unbanned.')
+          send_large_msg('chat#id'..chat_id, 'User with ID ['..matches[2]..'] is unbanned.')
         else
-          send_large_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
+          send_large_msg('chat#id'..chat_id, 'No user with ID '..matches[2]..' in (super)ban list.')
         end
       elseif matches[1] == 'superunban' then
         if is_super_banned(matches[2]) then
           superunban_user(matches[2], chat_id)
-          send_large_msg(receiver, 'User with ID ['..matches[2]..'] is globally unbanned.')
+          send_large_msg('chat#id'..chat_id, 'User with ID ['..matches[2]..'] is globally unbanned.')
         else
-          send_large_msg(receiver, 'No user with ID '..matches[2]..' in (super)ban list.')
+          send_large_msg('chat#id'..chat_id, 'No user with ID '..matches[2]..' in (super)ban list.')
         end
       end
       if not group_member then
-        send_large_msg(receiver, 'No user with ID '..matches[2]..' in this group.')
+        send_large_msg('chat#id'..chat_id, 'No user with ID '..matches[2]..' in this group.')
       end
     end
   end
@@ -86,15 +100,26 @@ do
     local chat_id = result.to.id
     local user_id = result.from.id
     local full_name = (result.from.first_name or '')..' '..(result.from.last_name or '')
-    if is_chat_msg(result) and not is_sudo(result) then
+    if is_chat_msg(result) then
       if extra.match == 'kick' then
-        chat_del_user('chat#id'..chat_id, 'user#id'..user_id, ok_cb, false)
+        if is_mod(user_id, chat_id) then
+          send_large_msg('chat#id'..chat_id, NO_KICK)
+        else
+          kick_user(user_id, chat_id)
+        end
       elseif extra.match == 'ban' then
-        ban_user(user_id, chat_id)
-        send_large_msg('chat#id'..chat_id, 'User '..user_id..' banned')
+        if is_mod(user_id, chat_id) then
+          send_large_msg('chat#id'..chat_id, NO_BAN)
+        else
+          ban_user(user_id, chat_id)
+        end
       elseif extra.match == 'superban' then
-        superban_user(user_id, chat_id)
-        send_large_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally banned!')
+        if is_mod(user_id, chat_id) then
+          send_large_msg('chat#id'..chat_id, NO_SUPERBAN)
+        else
+          superban_user(user_id, chat_id)
+          send_large_msg('chat#id'..chat_id, full_name..' ['..user_id..'] globally banned!')
+        end
       elseif extra.match == 'unban' then
         unban_user(user_id, chat_id)
         send_large_msg('chat#id'..chat_id, 'User '..user_id..' unbanned')
@@ -114,36 +139,37 @@ do
   end
 
   local function resolve_username(extra, success, result)
-    vardump(extra)
-    vardump(result)
     local chat_id = extra.msg.to.id
     if result ~= false then
       local user_id = result.id
       local username = result.username
       if is_chat_msg(extra.msg) then
-        -- check if sudo users
-        local is_sudoers = false
-        for v,sudoer in pairs(_config.sudo_users) do
-          if sudoer == user_id then
-            is_sudoers = true
+        if extra.match == 'kick' then
+          if is_mod(user_id, chat_id) then
+            send_large_msg('chat#id'..chat_id, NO_KICK)
+          else
+            kick_user(user_id, chat_id)
           end
-        end
-        if not is_sudoers then
-          if extra.match == 'kick' then
-            chat_del_user('chat#id'..chat_id, 'user#id'..result.id, ok_cb, false)
-          elseif extra.match == 'ban' then
+        elseif extra.match == 'ban' then
+          if is_mod(user_id, chat_id) then
+            send_large_msg('chat#id'..chat_id, NO_BAN)
+          else
             ban_user(user_id, chat_id)
             send_large_msg('chat#id'..chat_id, 'User @'..username..' banned')
-          elseif extra.match == 'superban' then
+          end
+        elseif extra.match == 'superban' then
+          if is_mod(user_id, chat_id) then
+            send_large_msg('chat#id'..chat_id, NO_SUPERBAN)
+          else
             superban_user(user_id, chat_id)
             send_large_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally banned!')
-          elseif extra.match == 'unban' then
-            unban_user(user_id, chat_id)
-            send_large_msg('chat#id'..chat_id, 'User @'..username..' unbanned', ok_cb,  true)
-          elseif extra.match == 'superunban' then
-            superunban_user(user_id, chat_id)
-            send_large_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally unbanned!')
           end
+        elseif extra.match == 'unban' then
+          unban_user(user_id, chat_id)
+          send_large_msg('chat#id'..chat_id, 'User @'..username..' unbanned', ok_cb,  true)
+        elseif extra.match == 'superunban' then
+          superunban_user(user_id, chat_id)
+          send_large_msg('chat#id'..chat_id, 'User @'..username..' ['..user_id..'] globally unbanned!')
         end
       else
         return 'Use This in Your Groups.'
@@ -172,7 +198,7 @@ do
     local chat_id = msg.to.id
 
     -- ANTI SPAM
-    if msg.from.type == 'user' and msg.text and not is_mod(msg) then
+    if msg.from.type == 'user' and msg.text and not is_mod(user_id, chat_id) then
       local _nl, ctrl_chars = string.gsub(msg.text, '%c', '')
       -- if string length more than 2048 or control characters is more than 50
       if string.len(msg.text) > 2048 or ctrl_chars > 50 then
@@ -189,7 +215,7 @@ do
     -- ANTI FLOOD
     local post_count = 'floodc:'..user_id..':'..chat_id
     redis:incr(post_count)
-    if msg.from.type == 'user' and not is_mod(msg) then
+    if msg.from.type == 'user' and not is_mod(user_id, chat_id) then
       local post_count = 'user:'..user_id..':floodc'
       local msgs = tonumber(redis:get(post_count) or 0)
       if msgs > NUM_MSG_MAX then
@@ -234,7 +260,7 @@ do
 
     -- WHITELIST
     -- Allow all sudo users even if whitelist is allowed
-    if redis:get('whitelist:enabled') and not is_sudo(msg) then
+    if redis:get('whitelist:enabled') and not is_sudo(user_id) then
       print('>>> banhammer : Whitelist enabled and not sudo')
       -- Check if user or chat is whitelisted
       local allowed = redis:get('whitelist:user#id'..user_id) or false
@@ -265,25 +291,22 @@ do
 
   local function run(msg, matches)
 
-    local receiver = get_receiver(msg)
     local user = 'user#id'..(matches[2] or '')
 
     if is_chat_msg(msg) then
       if matches[1] == 'kickme' then
-        if is_sudo(msg) or is_admin(msg) then
-          return 'I won\'t kick an admin!'
-        elseif is_mod(msg) then
-          return 'I won\'t kick a moderator!'
+        if is_mod(msg.from.id, msg.to.id) then
+          send_large_msg('chat#id'..msg.to.id, NO_KICK)
         else
           kick_user(msg.from.id, msg.to.id)
         end
       end
-      if is_mod(msg) then
+      if is_mod(msg.from.id, msg.to.id) then
         if matches[1] == 'kick' then
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
           elseif string.match(matches[2], '^%d+$') then
-            chat_info(receiver, action_by_id, {msg=msg, matches=matches})
+            chat_info('chat#id'..msg.to.id, action_by_id, {msg=msg, matches=matches})
           elseif string.match(matches[2], '^@.+$') then
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
@@ -291,7 +314,7 @@ do
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
           elseif string.match(matches[2], '^%d+$') then
-            chat_info(receiver, action_by_id, {msg=msg, matches=matches})
+            chat_info('chat#id'..msg.to.id, action_by_id, {msg=msg, matches=matches})
           elseif string.match(matches[2], '^@.+$') then
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
@@ -305,7 +328,7 @@ do
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
           elseif string.match(matches[2], '^%d+$') then
-            chat_info(receiver, action_by_id, {msg=msg, matches=matches})
+            chat_info('chat#id'..msg.to.id, action_by_id, {msg=msg, matches=matches})
           elseif string.match(matches[2], '^@.+$') then
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
@@ -364,12 +387,12 @@ do
           msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
         end
       end
-      if is_admin(msg) then
+      if is_admin(msg.from.id, msg.to.id) then
         if matches[1] == 'superban' then
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
           elseif string.match(matches[2], '^%d+$') then
-            chat_info(receiver, action_by_id, {msg=msg, matches=matches})
+            chat_info('chat#id'..msg.to.id, action_by_id, {msg=msg, matches=matches})
           elseif string.match(matches[2], '^@.+$') then
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
@@ -377,7 +400,7 @@ do
           if msg.reply_id then
             msgr = get_message(msg.reply_id, action_by_reply, {msg=msg, match=matches[1]})
           elseif string.match(matches[2], '^%d+$') then
-            chat_info(receiver, action_by_id, {msg=msg, matches=matches})
+            chat_info('chat#id'..msg.to.id, action_by_id, {msg=msg, matches=matches})
           elseif string.match(matches[2], '^@.+$') then
             msgr = res_user(string.gsub(matches[2], '@', ''), resolve_username, {msg=msg, match=matches[1]})
           end
