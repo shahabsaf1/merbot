@@ -13,7 +13,7 @@ end
 local function run(msg, matches)
     local receiver = get_receiver(msg)
 	if not is_sudo(msg) then 
-		return "For suxo only 😏"
+		return "For sudo only 😏"
 	end
 	if matches[1] then
 		chat_info(receiver, tagall, {receiver = receiver,msg_text = matches[1]})
