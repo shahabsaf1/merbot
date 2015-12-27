@@ -12,7 +12,7 @@ local function tagall(cb_extra, success, result)
 end
 local function run(msg, matches)
     local receiver = get_receiver(msg)
-	if not is_momod(msg) then 
+	if not is_mod(msg) then 
 		return "For mods only !"
 	end
 	if matches[1] then
