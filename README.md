@@ -13,25 +13,31 @@ Manage bans, kicks and white/black lists.
 Run system commands.
 4. [**Channels**](https://github.com/rizaumami/merbot/wiki/Plugins#channels)  
 Manage channels. Enable or disable channel.
-5. [**Greeter**](https://github.com/rizaumami/merbot/wiki/Plugins#greeter)  
+5. [**Google**](https://github.com/rizaumami/merbot/wiki/Plugins#google)  
+Google safe search.
+6. [**Greeter**](https://github.com/rizaumami/merbot/wiki/Plugins#greeter)  
 Sends a custom message when a user enters or leave a chat.
-6. [**Group Manager**](https://github.com/rizaumami/merbot/wiki/Plugins#groupmanager)  
+7. [**Group Manager**](https://github.com/rizaumami/merbot/wiki/Plugins#groupmanager)  
 Manage group chat.
-7. [**Help**](https://github.com/rizaumami/merbot/wiki/Plugins#help)  
+8. [**Help**](https://github.com/rizaumami/merbot/wiki/Plugins#help)  
 Help plugin. Get info from other plugins.
-8. [**Id**](https://github.com/rizaumami/merbot/wiki/Plugins#id)  
+9. [**Id**](https://github.com/rizaumami/merbot/wiki/Plugins#id)  
 Know your ID or the ID of a chat members.
-9. [**Invite**](https://github.com/rizaumami/merbot/wiki/Plugins#invite)  
+10. [**Invite**](https://github.com/rizaumami/merbot/wiki/Plugins#invite)  
 Invite other user to the chat group.
-10. [**Join**](https://github.com/rizaumami/merbot/wiki/Plugins#join)  
+11. [**Join**](https://github.com/rizaumami/merbot/wiki/Plugins#join)  
 Invite bot into a group chat.
-11. [**Moderation**](https://github.com/rizaumami/merbot/wiki/Plugins#moderation)  
+12. [**Logger**](https://github.com/rizaumami/merbot/wiki/Plugins#logger)  
+Logging group text messages.
+13. [**Moderation**](https://github.com/rizaumami/merbot/wiki/Plugins#moderation)  
 Group moderation, i.e promote, demote and list administrators or moderators of a group.
-12. [**Plugins**](https://github.com/rizaumami/merbot/wiki/Plugins#plugins)  
+14. [**Plugins**](https://github.com/rizaumami/merbot/wiki/Plugins#plugins)  
 Plugin to manage other plugins. Enable, disable or reload.
-13. [**Stats**](https://github.com/rizaumami/merbot/wiki/Plugins#stats)  
+15. [**Reddit**](https://github.com/rizaumami/merbot/wiki/Plugins#reddit)  
+Subreddit or frontpage of reddit.com.
+16. [**Stats**](https://github.com/rizaumami/merbot/wiki/Plugins#stats)  
 Update users stats.
-14. [**Version**](https://github.com/rizaumami/merbot/wiki/Plugins#version)  
+17. [**Version**](https://github.com/rizaumami/merbot/wiki/Plugins#version)  
 Shows bot version.
 
 Consult [wiki](https://github.com/rizaumami/merbot/wiki/Plugins) to know how to use those plugins.
