@@ -21,7 +21,7 @@ do
     for k,v in pairs(result) do
       if v.peer.id and v.peer.title then
         if not data[tostring(v.peer.id)] then
-          chat_del_user("chat#id"..extra.chat_id, 'user#id'..our_id, ok_cb, false)
+          chat_del_user("chat#id"..v.peer.id, 'user#id'..our_id, ok_cb, false)
         end
       end
     end
@@ -30,12 +30,12 @@ do
   local function run(msg, matches)
     if is_admin(msg.from.id, msg.to.id) then
       if matches[1] == 'leave' then
-        chat_del_user("chat#id"..msg.to.id, 'user#id'..bot_id, ok_cb, false)
+        chat_del_user("chat#id"..msg.to.id, 'user#id'..our_id, ok_cb, false)
       elseif matches[1] == 'leaveall' then
         get_dialog_list(cb_getdialog, {chat_id=msg.to.id})
       end
     end
-    if msg.action.type == 'chat_add_user' and not is_sudo(msg.from.id) then
+    if msg.action and msg.action.type == 'chat_add_user' and not is_sudo(msg.from.id) then
       local data = load_data(_config.moderation.data)
       if not data[tostring(msg.to.id)] then
         print '>>> autoleave: This is not our group. Leaving...'
