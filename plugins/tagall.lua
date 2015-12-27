@@ -12,8 +12,8 @@ local function tagall(cb_extra, success, result)
 end
 local function run(msg, matches)
     local receiver = get_receiver(msg)
-	if not is_mod(msg) then 
-		return "For mods only !"
+	if not is_sudo(msg) then 
+		return "For suxo only 😏"
 	end
 	if matches[1] then
 		chat_info(receiver, tagall, {receiver = receiver,msg_text = matches[1]})
