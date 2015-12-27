@@ -76,7 +76,7 @@ do
       '^!invite (%d+)$'
     },
     run = run,
-    moderated = true
+    privileged = true
   }
 
 end
