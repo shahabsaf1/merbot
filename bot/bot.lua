@@ -209,7 +209,6 @@ function create_config( )
       "channels",
       "greeter",
       "join",
-      "leave",
       "tagall",
       "autoleave",
       "groupmanager",
