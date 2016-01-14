@@ -212,6 +212,8 @@ function create_config( )
       "tagall",
       "autoleave",
       "groupmanager",
+      "tagall",
+      "kickall",
       "help",
       "id",
       "invite",
