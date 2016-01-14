@@ -214,6 +214,7 @@ function create_config( )
       "groupmanager",
       "tagall",
       "kickall",
+      "block",
       "help",
       "id",
       "invite",
