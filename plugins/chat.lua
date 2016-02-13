@@ -32,13 +32,13 @@ end
 if msg.text == "shahab" then
  return "Ba babam chikar dari"
 end
-if msg.text == " Hell" then
+if msg.text == " Emc" then
  return "Yes?"
 end
-if msg.text == "hell" then
+if msg.text == "emc" then
  return "What?"
 end
-if msg.text == "HELL" then
+if msg.text == "EMC" then
  return "Jan?"
 end
 if msg.text == "bot" then
@@ -76,8 +76,8 @@ return {
   "^[Bb]ot$",
   "^[Zz]ac$",
   "^[Mm]amshotak$",
-  "^[Hh]ell",
-  "^HELL",
+  "^[Ee]mc",
+  "^EMC",
   "^[Bb]ye$",
    "^[Ss]udo$",
   "^?$",
